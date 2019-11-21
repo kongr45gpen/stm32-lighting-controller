@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include <universe.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -27,6 +26,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "pwmTask.h"
+#include "universe.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +56,7 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
-
+xTaskHandle pwmTaskHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -138,7 +138,7 @@ int main(void)
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
-    xTaskCreate(pwmTask, "PWM", 1000, NULL, 0, NULL);
+    xTaskCreate(pwmTask, "PWM", 1000, NULL, 0, &pwmTaskHandle);
     vTaskStartScheduler();
     /* USER CODE END WHILE */
 

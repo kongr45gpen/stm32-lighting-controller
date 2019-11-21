@@ -28,8 +28,8 @@ void pwmTask( void *pvParameters ) {
             &htim1, &htim2, &htim3, &htim4
     };
 
-    const uint16_t period = 4096;
-    const uint16_t prescaler = 50;
+    const uint16_t period = 4096; // 12 bits of resolution have proven to look good enough
+    const uint16_t prescaler = 500;
 
     for (int i = 0; i < 4; i++) {
         // Set the settings of the timer based on the global settings
@@ -40,7 +40,7 @@ void pwmTask( void *pvParameters ) {
         HAL_TIM_PWM_Init(usedTimers[i]);
 
         // Start the timer itself
-        HAL_TIM_Base_Start(usedTimers[i]);
+        HAL_TIM_Base_Start_IT(usedTimers[i]);
 
         // Start all the PWM channels
         HAL_TIM_PWM_Start(usedTimers[i], TIM_CHANNEL_1);
@@ -52,10 +52,11 @@ void pwmTask( void *pvParameters ) {
     while (1) {
         // Set all the values from the registers
         for (int i = 0; i < 16; i++) {
+            // This converts an 8-bit to a 12-bit value
             (*(pwmChannels[i])) = universe[i] * 16UL;
         }
 
         // Wait until the next timer interrupt
-        ulTaskNotifyTake(pdTRUE, 10);
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
     }
 }
