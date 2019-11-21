@@ -57,6 +57,6 @@ void pwmTask( void *pvParameters ) {
         }
 
         // Wait until the next timer interrupt
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        xEventGroupWaitBits(xPwmEventGroupHandle, PWMTASK_TIM_BIT | PWMTASK_UPDATE_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
     }
 }

@@ -34,6 +34,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "FreeRTOS.h"
 #include "task.h"
+#include <event_groups.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -46,6 +47,9 @@ extern TIM_HandleTypeDef htim4;
 
 // FreeRTOS task handles
 extern xTaskHandle pwmTaskHandle;
+
+// FreeRTOS resource handles
+extern EventGroupHandle_t xPwmEventGroupHandle;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

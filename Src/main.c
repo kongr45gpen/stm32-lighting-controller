@@ -57,6 +57,7 @@ UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 xTaskHandle pwmTaskHandle;
+EventGroupHandle_t xPwmEventGroupHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,6 +85,7 @@ void pingTask( void *pvParameters ) {
         HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
 
         universe[6] += 1;
+        xEventGroupSetBits(xPwmEventGroupHandle, PWMTASK_UPDATE_BIT);
 
 //        vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -136,6 +138,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
     // Re-enable the system clock
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+
+    xPwmEventGroupHandle = xEventGroupCreate();
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
     xTaskCreate(pwmTask, "PWM", 1000, NULL, 0, &pwmTaskHandle);
