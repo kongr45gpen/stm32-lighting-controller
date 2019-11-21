@@ -6,6 +6,10 @@
 #include "main.h"
 #include "stm32h7xx.h"
 
+// The exponential gamma 2factor that defines how non-linear the lighting curve is.
+// A value of 0 means linear change
+const float gam = 3.0f;
+
 TIM_TypeDef * pwmTimers[16] = {
     TIM1, TIM1, TIM1, TIM1,
     TIM2, TIM2, TIM2, TIM2,
@@ -50,10 +54,20 @@ void pwmTask( void *pvParameters ) {
     }
 
     while (1) {
+        // Precalculate (e^gam - 1) for later
+        float exp_gam = expf(gam) - 1;
+
         // Set all the values from the registers
         for (int i = 0; i < 16; i++) {
-            // This converts an 8-bit to a 12-bit value
-            (*(pwmChannels[i])) = universe[i] * 16UL;
+            // Get the original 8-bit value, in a 0-1 range
+            float initialValue = universe[i] / 255.0;
+
+            // Normalise the value by means of an exponential curve
+            float normalised = (gam == 0) ? initialValue
+                    : ( expf(gam * initialValue) - 1) / exp_gam;
+
+            // Convert the [0,1] value into a 12-bit integer
+            (*(pwmChannels[i])) = normalised * 4095;
         }
 
         // Wait until the next timer interrupt
