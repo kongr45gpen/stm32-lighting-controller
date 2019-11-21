@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include <universe.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -81,7 +82,10 @@ void pingTask( void *pvParameters ) {
         uint8_t strlen = snprintf(string, 512, "%lu Hello World\r\n", xTaskGetTickCount());
 
         HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        universe[6] += 1;
+
+//        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 /* USER CODE END 0 */

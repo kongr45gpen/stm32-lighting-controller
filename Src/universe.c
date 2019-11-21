@@ -1,3 +1,5 @@
 #include "stdint.h"
 
-static uint8_t universe;
+#include "universe.h"
+
+uint8_t universe[512];
