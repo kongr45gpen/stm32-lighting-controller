@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "pwmTask.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,8 +72,12 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void pingTask( void *pvParameters ) {
+    static char string[512];
+
     while(1) {
-        HAL_UART_Transmit(&huart3, "Hello World\r\n", strlen("Hello World\r\n"), HAL_MAX_DELAY);
+        uint8_t strlen = snprintf(string, 512, "%lu Hello World\r\n", xTaskGetTickCount());
+
+        HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
@@ -125,6 +130,7 @@ int main(void)
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
+    xTaskCreate(pwmTask, "PWM", 1000, NULL, 0, NULL);
     vTaskStartScheduler();
     /* USER CODE END WHILE */
 
@@ -236,6 +242,10 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
