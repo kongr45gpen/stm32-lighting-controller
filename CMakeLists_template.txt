@@ -17,8 +17,8 @@ set(SIZE arm-none-eabi-size)
 SET(LINKER_SCRIPT $${CMAKE_SOURCE_DIR}/${linkerScript})
 
 #Uncomment for hardware floating point
-#SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
-#add_definitions(-DARM_MATH_CM4 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING -D__FPU_PRESENT=1)
+SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
+add_definitions(-DARM_MATH_CM7 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING -D__FPU_PRESENT=1)
 
 #Uncomment for software floating point
 #SET(FPU_FLAGS "-mfloat-abi=soft")
@@ -39,9 +39,12 @@ add_definitions(${defines})
 
 file(GLOB_RECURSE SOURCES ${sources})
 
+# Support for FreeRTOS
+file(GLOB FREERTOS_SOURCES "Lib/freertos/*.c" "Lib/freertos/portable/GCC/ARM_CM7/r0p1/port.c" "Lib/freertos/portable/MemMang/heap_2.c")
+
 include_directories(${includes})
 
-add_executable($${PROJECT_NAME}.elf $${SOURCES} $${LINKER_SCRIPT})
+add_executable($${PROJECT_NAME}.elf $${SOURCES} $${FREERTOS_SOURCES} $${EXTRA_SOURCES} $${LINKER_SCRIPT})
 
 set(CMAKE_EXE_LINKER_FLAGS
     "$${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=$${PROJECT_BINARY_DIR}/$${PROJECT_NAME}.map")
@@ -54,3 +57,8 @@ add_custom_command(TARGET $${PROJECT_NAME}.elf POST_BUILD
         COMMAND $${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:$${PROJECT_NAME}.elf> $${BIN_FILE}
         COMMENT "Building $${HEX_FILE}
 Building $${BIN_FILE}")
+
+include_directories(
+        "${PROJECT_SOURCE_DIR}/Lib/freertos/include"
+        "${PROJECT_SOURCE_DIR}/Lib/freertos/portable/GCC/ARM_CM7/r0p1"
+)

@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "FreeRTOS.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +70,12 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void pingTask( void *pvParameters ) {
+    while(1) {
+        HAL_UART_Transmit(&huart3, "Hello World\r\n", strlen("Hello World\r\n"), HAL_MAX_DELAY);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -89,14 +95,16 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+    // SysTick is handled by FreeRTOS, so it mustn't be called, as the FreeRTOS memory is not initialized
+    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+    // Since SystemClock_Config reinitializes the system tick, disable it again
+    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -108,17 +116,19 @@ int main(void)
   MX_TIM5_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+    HAL_UART_Transmit(&huart3, (uint8_t *) "Hello welrd\r\n", strlen("Hello welrd\r\n"), HAL_MAX_DELAY);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+    // Re-enable the system clock
+    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+
+    xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
+    vTaskStartScheduler();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
   /* USER CODE END 3 */
 }
 
