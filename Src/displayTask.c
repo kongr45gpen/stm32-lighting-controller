@@ -149,20 +149,25 @@ void displayTask(void *pvParameters) {
         ssd1306_WriteChar(refreshRateIndicator ? '.' : ' ', Font_7x10, White); // Write a dot for the update
         refreshRateIndicator = !refreshRateIndicator; // Reset the value for the next iteration
 
-        // Draw the universe channel values
+        // Draw the universe channel values as boxes with different heights according to the values
         uint16_t c = 0; // The current channel
-        for (int y = 0; y < 4; y++) {
-            for (int x = RECT_0_X + 18; x < RECT_1_X - CHAN_WIDTH; x += CHAN_WIDTH + CHAN_X_PAD) {
-                uint8_t level = universe[c] / (255 / CHAN_WIDTH);
+        for (int y = 0; y < 4; y++) { // The current row #
+            for (int x = RECT_0_X + 18; x < RECT_1_X - CHAN_WIDTH; x += CHAN_WIDTH + CHAN_X_PAD) { // The current X pixel
+                // Normalize the level of the channel so we can find how tall it should be
+                uint8_t level = universe[c] / (255 / CHAN_HEIGHT);
 
+                // The bottom line of the box
                 uint16_t originY = RECT_0_Y + 2 + CHAN_HEIGHT + y * (CHAN_HEIGHT + CHAN_Y_PAD);
 
+                // Draw the box itself
                 for (int z = 0; z < CHAN_HEIGHT; z++) {
                     for (int j = 0; j < CHAN_WIDTH; j++) {
+                        // White when the level is high enough, black to show nothing
                         ssd1306_DrawPixel(x + j, originY - z, level > z ? White : Black);
                     }
                 }
 
+                // We have processed this channel. Let's go to the next channel.
                 c++;
             }
 
