@@ -26,6 +26,7 @@
 #include "pwmTask.h"
 #include "dmxTask.h"
 #include "stm32h7xx_ll_gpio.h"
+#include "stm32h7xx_ll_dma.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +62,7 @@
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim16;
+extern DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -160,6 +162,29 @@ void DebugMon_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles DMA1 stream0 global interrupt.
+  */
+void DMA1_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if (LL_DMA_IsActiveFlag_TC0(DMA1)) {
+        // The DMA has been triggered. That means that the DMX packet has been sent completely.
+        // Notify the corresponding task
+        xTaskNotifyFromISR(dmxTaskHandle, DMXTASK_TXCOMPLETE_BIT, eSetBits, &xHigherPriorityTaskWoken);
+
+        // Clear the TC flag (since we didn't do any HAL shenanigans, the DMA IRQ Handler will not do that)
+        LL_DMA_ClearFlag_TC0(DMA1);
+    }
+  /* USER CODE END DMA1_Stream0_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+  /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  /* USER CODE END DMA1_Stream0_IRQn 1 */
+}
 
 /**
   * @brief This function handles TIM1 update interrupt.

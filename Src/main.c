@@ -58,6 +58,7 @@ TIM_HandleTypeDef htim16;
 
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 xTaskHandle pwmTaskHandle;
@@ -77,6 +78,7 @@ static void MX_SPI1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_RNG_Init(void);
+static void MX_DMA_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -91,10 +93,12 @@ void pingTask( void *pvParameters ) {
 
         HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
 
-        universe[6] += 1;
+        universe[0] = 255;
+        universe[1] += 1;
+//        universe[6] += 1;
         xEventGroupSetBits(xPwmEventGroupHandle, PWMTASK_UPDATE_BIT);
 
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(2));
     }
 }
 /* USER CODE END 0 */
@@ -126,6 +130,8 @@ int main(void)
   /* USER CODE BEGIN SysInit */
     // Since SystemClock_Config reinitializes the system tick, disable it again
     SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+
+    __HAL_RCC_DMA1_CLK_ENABLE();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -139,6 +145,7 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM16_Init();
   MX_RNG_Init();
+  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
     HAL_UART_Transmit(&huart3, (uint8_t *) "Hello welrd\r\n", strlen("Hello welrd\r\n"), HAL_MAX_DELAY);
   /* USER CODE END 2 */
@@ -694,6 +701,22 @@ static void MX_USART3_UART_Init(void)
   /* USER CODE BEGIN USART3_Init 2 */
 
   /* USER CODE END USART3_Init 2 */
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 6, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
 }
 

@@ -177,7 +177,11 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
-  
+  /* Section for storing data in SRAM */
+  .sram :
+  {
+    . = ALIGN(8);
+  } >RAM_D1
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
