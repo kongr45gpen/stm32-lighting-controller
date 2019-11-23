@@ -23,8 +23,11 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-/* USER CODE END Includes */
 #include "pwmTask.h"
+#include "dmxTask.h"
+#include "stm32h7xx_ll_gpio.h"
+/* USER CODE END Includes */
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -57,6 +60,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim16;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -167,10 +171,59 @@ void TIM1_UP_IRQHandler(void)
   /* USER CODE END TIM1_UP_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_UP_IRQn 1 */
+    // DMX finished event
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xEventGroupSetBitsFromISR(xPwmEventGroupHandle, PWMTASK_TIM_BIT, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
   /* USER CODE END TIM1_UP_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM16 global interrupt.
+  */
+void TIM16_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM16_IRQn 0 */
+  // A variable that shows the state of the counter
+    static enum state {
+        afterBreak, afterMAB
+    } state = afterBreak;
+
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    // Update event received
+    if (__HAL_TIM_GET_IT_SOURCE(&htim16, TIM_IT_UPDATE) != RESET) {
+        // The timer was called. This means we stopped counting
+        if (state == afterBreak) {
+            // The break pulse is over. Now we can send the MAB pulse
+            __HAL_TIM_SET_AUTORELOAD(&htim16, 12 - 1); // pulse duration is 12 us
+            // Set the pin to HIGH
+            LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_5);
+            // Set the correct state
+            state = afterMAB;
+            // Start counting again (the timer is one-shot)
+            HAL_TIM_Base_Start_IT(&htim16);
+        } else if (state == afterMAB) {
+            // The MAB pulse is over. Reset the timer to the duration of the break pulse
+            __HAL_TIM_SET_AUTORELOAD(&htim16, 100 - 1); // pulse duration is 100 us
+            // Set the pin to its alternate function
+            LL_GPIO_SetPinMode(GPIOD, LL_GPIO_PIN_5, LL_GPIO_MODE_ALTERNATE);
+            // Set the correct state, so that we're ready for the next transition
+            state = afterBreak;
+
+            // Send a notification to the DMX task so it can do its thing
+            xTaskNotifyFromISR(dmxTaskHandle, DMXTASK_BREAK_BIT, eSetBits, &xHigherPriorityTaskWoken);
+        }
+    }
+
+  /* USER CODE END TIM16_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim16);
+  /* USER CODE BEGIN TIM16_IRQn 1 */
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+
+  /* USER CODE END TIM16_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

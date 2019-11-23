@@ -44,9 +44,12 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim16;
+extern RNG_HandleTypeDef hrng;
 
 // FreeRTOS task handles
 extern xTaskHandle pwmTaskHandle;
+extern xTaskHandle dmxTaskHandle;
 
 // FreeRTOS resource handles
 extern EventGroupHandle_t xPwmEventGroupHandle;

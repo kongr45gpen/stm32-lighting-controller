@@ -33,7 +33,7 @@ void pwmTask( void *pvParameters ) {
     };
 
     const uint16_t period = 4096; // 12 bits of resolution have proven to look good enough
-    const uint16_t prescaler = 500;
+    const uint16_t prescaler = 50;
 
     for (int i = 0; i < 4; i++) {
         // Set the settings of the timer based on the global settings
@@ -69,6 +69,8 @@ void pwmTask( void *pvParameters ) {
             // Convert the [0,1] value into a 12-bit integer
             (*(pwmChannels[i])) = normalised * 4095;
         }
+
+        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
         // Wait until the next timer interrupt
         xEventGroupWaitBits(xPwmEventGroupHandle, PWMTASK_TIM_BIT | PWMTASK_UPDATE_BIT, pdTRUE, pdTRUE, portMAX_DELAY);

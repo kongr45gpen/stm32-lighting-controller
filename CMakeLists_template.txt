@@ -37,12 +37,12 @@ set(CMAKE_CXX_STANDARD 11)
 #add_definitions(-DARM_MATH_CM4 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING -D__FPU_PRESENT=1)
 add_definitions(${defines})
 
-file(GLOB_RECURSE SOURCES ${sources})
+file(GLOB_RECURSE SOURCES ${sources} "Drivers_LL/*.*")
 
 # Support for FreeRTOS
 file(GLOB FREERTOS_SOURCES "Lib/freertos/*.c" "Lib/freertos/portable/GCC/ARM_CM7/r0p1/port.c" "Lib/freertos/portable/MemMang/heap_2.c")
 
-include_directories(${includes})
+include_directories(${includes} Drivers_LL/Inc)
 
 add_executable($${PROJECT_NAME}.elf $${SOURCES} $${FREERTOS_SOURCES} $${EXTRA_SOURCES} $${LINKER_SCRIPT})
 

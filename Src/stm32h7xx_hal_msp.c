@@ -79,6 +79,50 @@ void HAL_MspInit(void)
 }
 
 /**
+* @brief RNG MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hrng: RNG handle pointer
+* @retval None
+*/
+void HAL_RNG_MspInit(RNG_HandleTypeDef* hrng)
+{
+  if(hrng->Instance==RNG)
+  {
+  /* USER CODE BEGIN RNG_MspInit 0 */
+
+  /* USER CODE END RNG_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_RNG_CLK_ENABLE();
+  /* USER CODE BEGIN RNG_MspInit 1 */
+
+  /* USER CODE END RNG_MspInit 1 */
+  }
+
+}
+
+/**
+* @brief RNG MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hrng: RNG handle pointer
+* @retval None
+*/
+void HAL_RNG_MspDeInit(RNG_HandleTypeDef* hrng)
+{
+  if(hrng->Instance==RNG)
+  {
+  /* USER CODE BEGIN RNG_MspDeInit 0 */
+
+  /* USER CODE END RNG_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_RNG_CLK_DISABLE();
+  /* USER CODE BEGIN RNG_MspDeInit 1 */
+
+  /* USER CODE END RNG_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief SPI MSP Initialization
 * This function configures the hardware resources used in this example
 * @param hspi: SPI handle pointer
@@ -201,6 +245,31 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM4_MspInit 1 */
 
   /* USER CODE END TIM4_MspInit 1 */
+  }
+
+}
+
+/**
+* @brief TIM_Base MSP Initialization
+* This function configures the hardware resources used in this example
+* @param htim_base: TIM_Base handle pointer
+* @retval None
+*/
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+{
+  if(htim_base->Instance==TIM16)
+  {
+  /* USER CODE BEGIN TIM16_MspInit 0 */
+
+  /* USER CODE END TIM16_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM16_CLK_ENABLE();
+    /* TIM16 interrupt Init */
+    HAL_NVIC_SetPriority(TIM16_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(TIM16_IRQn);
+  /* USER CODE BEGIN TIM16_MspInit 1 */
+
+  /* USER CODE END TIM16_MspInit 1 */
   }
 
 }
@@ -380,6 +449,31 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 }
 
 /**
+* @brief TIM_Base MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param htim_base: TIM_Base handle pointer
+* @retval None
+*/
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
+{
+  if(htim_base->Instance==TIM16)
+  {
+  /* USER CODE BEGIN TIM16_MspDeInit 0 */
+
+  /* USER CODE END TIM16_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM16_CLK_DISABLE();
+
+    /* TIM16 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM16_IRQn);
+  /* USER CODE BEGIN TIM16_MspDeInit 1 */
+
+  /* USER CODE END TIM16_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief UART MSP Initialization
 * This function configures the hardware resources used in this example
 * @param huart: UART handle pointer
@@ -401,8 +495,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     PD5     ------> USART2_TX 
     */
     GPIO_InitStruct.Pin = DMX_OUT_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
     HAL_GPIO_Init(DMX_OUT_GPIO_Port, &GPIO_InitStruct);

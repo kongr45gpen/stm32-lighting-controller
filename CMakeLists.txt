@@ -37,12 +37,12 @@ set(CMAKE_CXX_STANDARD 11)
 #add_definitions(-DARM_MATH_CM4 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING -D__FPU_PRESENT=1)
 add_definitions(-D__weak=__attribute__\(\(weak\)\) -D__packed=__attribute__\(\(__packed__\)\) -DUSE_HAL_DRIVER -DSTM32H743xx)
 
-file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Src/*.*")
+file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Src/*.*" "Drivers_LL/*.*")
 
 # Support for FreeRTOS
 file(GLOB FREERTOS_SOURCES "Lib/freertos/*.c" "Lib/freertos/portable/GCC/ARM_CM7/r0p1/port.c" "Lib/freertos/portable/MemMang/heap_2.c")
 
-include_directories(Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/STM32H7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include)
+include_directories(Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/STM32H7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include Drivers_LL/Inc)
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${FREERTOS_SOURCES} ${EXTRA_SOURCES} ${LINKER_SCRIPT})
 
