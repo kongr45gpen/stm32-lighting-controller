@@ -2,6 +2,7 @@
 #include <task.h>
 #include <string.h>
 #include <main.h>
+#include <universe.h>
 #include "displayTask.h"
 #include "ssd1306.h"
 
@@ -9,11 +10,18 @@
 #define RECT_0_Y 16
 #define RECT_1_X 80
 #define RECT_1_Y 63
+#define CHAN_X_PAD 2
+#define CHAN_Y_PAD 5
+#define CHAN_WIDTH 4
+#define CHAN_HEIGHT 6
+
+enum ModeDisplay modeDisplay = eModeReady;
 
 char *functionNames[] = {
         "Check",
         "Reset",
         "B/O",
+        "Flash"
 };
 const uint8_t functionCount = sizeof(functionNames) / sizeof(functionNames[0]);
 
@@ -38,18 +46,46 @@ static void redraw() {
         ssd1306_DrawPixel(RECT_0_X, i, White);
         ssd1306_DrawPixel(RECT_1_X, i, White);
     }
+
+    // Draw numbers for DMX channels
+    ssd1306_SetCursor(RECT_0_X + 1, RECT_0_Y + 4);
+    ssd1306_WriteString("01", Font_7x10, White);
+    ssd1306_SetCursor(RECT_0_X + 1, RECT_0_Y + 4 + CHAN_HEIGHT + CHAN_Y_PAD);
+    ssd1306_WriteString("11", Font_7x10, White);
+    ssd1306_SetCursor(RECT_0_X + 1, RECT_0_Y + 4 + 2 * (CHAN_HEIGHT + CHAN_Y_PAD));
+    ssd1306_WriteString("21", Font_7x10, White);
+    ssd1306_SetCursor(RECT_0_X + 1, RECT_0_Y + 4 + 3 * (CHAN_HEIGHT + CHAN_Y_PAD));
+    ssd1306_WriteString("31", Font_7x10, White);
+}
+
+/**
+ * Run one of the functions available on the menu
+ * @param function
+ */
+static void runFunction(uint8_t function) {
+    if (function == 3) { // Flash
+        modeDisplay = eModeFlash;
+    } else if (function == 1) { // Reset
+        modeDisplay = eModeReady;
+    } else if (function == 2) { // Blackout
+        modeDisplay = eModeBlackout;
+    } else if (function == 0) { // Check
+        modeDisplay = eModeCheck;
+    }
 }
 
 void displayTask(void *pvParameters) {
-    ssd1306_Init();
-
-    redraw();
-
+    // The currently selected function on the menu
     static uint8_t currentFunction = 0;
+
+    // Initialise the OLED display
+    ssd1306_Init();
+    redraw();
 
     while (1) {
         // First, check if the button was pressed
-        if (0 != (DISPLAYTASK_PRESSED_BIT & xEventGroupWaitBits(xButtonEventGroupHandle, DISPLAYTASK_PRESSED_BIT, 0x0, pdFALSE, 0))) {
+        // The ticks to wait here define the update rate of the screen
+        if (0 != (DISPLAYTASK_PRESSED_BIT & xEventGroupWaitBits(xButtonEventGroupHandle, DISPLAYTASK_PRESSED_BIT, 0x0, pdFALSE, 50))) {
             // The button was pressed. Wait some time for debouncing
             vTaskDelay(10);
 
@@ -68,7 +104,7 @@ void displayTask(void *pvParameters) {
                           xEventGroupWaitBits(xButtonEventGroupHandle, DISPLAYTASK_RELEASED_BIT, 0x0, pdFALSE,
                                               pdMS_TO_TICKS(2000)))) {
                     // The user has pressed the button for a long time. Perform the function
-                    currentFunction = (currentFunction - 1 + functionCount) % functionCount;
+                    runFunction(currentFunction);
                 } else {
                     // The user pressed the button for too long. Assume an error and do nothing.
                 }
@@ -81,14 +117,55 @@ void displayTask(void *pvParameters) {
         }
 
         // Status string
+        char modeText[4] = { '\0' };
+        switch(modeDisplay) {
+            case eModeReady:
+                memcpy(modeText, "RDY", 3);
+                break;
+            case eModeCheck:
+                memcpy(modeText, "CHK", 3);
+                break;
+            case eModeSerial:
+                memcpy(modeText, "SR ", 3);
+                break;
+            case eModeWireless:
+                memcpy(modeText, "RX ", 3);
+                break;
+            case eModeBlackout:
+                memcpy(modeText, "B/O", 3);
+                break;
+            case eModeFlash:
+                memcpy(modeText, "FLS", 3);
+                break;
+            default:
+                memcpy(modeText, "???", 3);
+        }
         ssd1306_SetCursor(92, 0); // top right corner
-        ssd1306_WriteString("RDY", Font_11x18, White);
+        ssd1306_WriteString(modeText, Font_11x18, White);
 
-        ssd1306_SetCursor(2, 50);
-        if (xTaskGetTickCount() % 3 < 1) {
-            ssd1306_WriteChar('>', Font_7x10, White);
-        } else {
-            ssd1306_WriteChar(' ', Font_7x10, White);
+        // Show a refresh rate indicator to let the user know if the screen is being updated
+        ssd1306_SetCursor(80, 0); // Draw next to the title
+        static uint8_t refreshRateIndicator = 0; // A boolean that is toggled every time
+        ssd1306_WriteChar(refreshRateIndicator ? '.' : ' ', Font_7x10, White); // Write a dot for the update
+        refreshRateIndicator = !refreshRateIndicator; // Reset the value for the next iteration
+
+        // Draw the universe channel values
+        uint16_t c = 0; // The current channel
+        for (int y = 0; y < 4; y++) {
+            for (int x = RECT_0_X + 18; x < RECT_1_X - CHAN_WIDTH; x += CHAN_WIDTH + CHAN_X_PAD) {
+                uint8_t level = universe[c] / (255 / CHAN_WIDTH);
+
+                uint16_t originY = RECT_0_Y + 2 + CHAN_HEIGHT + y * (CHAN_HEIGHT + CHAN_Y_PAD);
+
+                for (int z = 0; z < CHAN_HEIGHT; z++) {
+                    for (int j = 0; j < CHAN_WIDTH; j++) {
+                        ssd1306_DrawPixel(x + j, originY - z, level > z ? White : Black);
+                    }
+                }
+
+                c++;
+            }
+
         }
 
         // Draw the 3 current function names
@@ -125,8 +202,6 @@ void displayTask(void *pvParameters) {
         }
 
         ssd1306_UpdateScreen();
-
-        vTaskDelay(10);
     }
 }
 

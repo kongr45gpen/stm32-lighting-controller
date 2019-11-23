@@ -100,12 +100,12 @@ void pingTask( void *pvParameters ) {
 
         universe[0] = 255;
         universe[1] += 1;
-        universe[2] += 1;
+        universe[2] += 4;
         universe[3] += 1;
 //        universe[6] += 1;
         xEventGroupSetBits(xPwmEventGroupHandle, PWMTASK_UPDATE_BIT);
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+//        vTaskDelay(pdMS_TO_TICKS(2));
     }
 }
 /* USER CODE END 0 */
