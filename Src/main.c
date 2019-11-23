@@ -65,6 +65,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 xTaskHandle pwmTaskHandle;
 xTaskHandle dmxTaskHandle;
 EventGroupHandle_t xPwmEventGroupHandle;
+EventGroupHandle_t xButtonEventGroupHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,7 +105,7 @@ void pingTask( void *pvParameters ) {
 //        universe[6] += 1;
         xEventGroupSetBits(xPwmEventGroupHandle, PWMTASK_UPDATE_BIT);
 
-        vTaskDelay(pdMS_TO_TICKS(2));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 /* USER CODE END 0 */
@@ -162,11 +163,12 @@ int main(void)
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 
     xPwmEventGroupHandle = xEventGroupCreate();
+    xButtonEventGroupHandle = xEventGroupCreate();
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
     xTaskCreate(dmxTask, "dmx", 500, NULL, 4, &dmxTaskHandle);
-    xTaskCreate(pwmTask, "PWM", 1000, NULL, 0, &pwmTaskHandle);
-    xTaskCreate(displayTask, "display", 10000, NULL, 7, NULL);
+    xTaskCreate(pwmTask, "PWM", 1000, NULL, 2, &pwmTaskHandle);
+    xTaskCreate(displayTask, "display", 10000, NULL, 1, NULL);
     vTaskStartScheduler();
     /* USER CODE END WHILE */
 
@@ -746,36 +748,36 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(OLED_2_GPIO_Port, OLED_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, IGNORE_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15|GPIO_PIN_7, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, OLED_1_Pin|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : USER_Btn_Pin */
   GPIO_InitStruct.Pin = USER_Btn_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USER_Btn_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  /*Configure GPIO pin : SPI1_NSS_Pin */
+  GPIO_InitStruct.Pin = SPI1_NSS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(SPI1_NSS_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PF12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12;
+  /*Configure GPIO pin : OLED_2_Pin */
+  GPIO_InitStruct.Pin = OLED_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+  HAL_GPIO_Init(OLED_2_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : IGNORE_Pin LD3_Pin LD2_Pin */
   GPIO_InitStruct.Pin = IGNORE_Pin|LD3_Pin|LD2_Pin;
@@ -784,12 +786,16 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PD15 PD7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_15|GPIO_PIN_7;
+  /*Configure GPIO pins : OLED_1_Pin PD7 */
+  GPIO_InitStruct.Pin = OLED_1_Pin|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 12, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

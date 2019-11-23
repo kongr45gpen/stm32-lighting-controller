@@ -35,6 +35,7 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
 #include <event_groups.h>
+#include <semphr.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -46,6 +47,7 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim16;
 extern RNG_HandleTypeDef hrng;
+extern UART_HandleTypeDef huart3;
 
 // FreeRTOS task handles
 extern xTaskHandle pwmTaskHandle;
@@ -53,6 +55,7 @@ extern xTaskHandle dmxTaskHandle;
 
 // FreeRTOS resource handles
 extern EventGroupHandle_t xPwmEventGroupHandle;
+extern EventGroupHandle_t xButtonEventGroupHandle;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -77,8 +80,13 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define USER_Btn_Pin GPIO_PIN_13
 #define USER_Btn_GPIO_Port GPIOC
+#define USER_Btn_EXTI_IRQn EXTI15_10_IRQn
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
+#define SPI1_NSS_Pin GPIO_PIN_4
+#define SPI1_NSS_GPIO_Port GPIOA
+#define OLED_2_Pin GPIO_PIN_12
+#define OLED_2_GPIO_Port GPIOF
 #define IGNORE_Pin GPIO_PIN_12
 #define IGNORE_GPIO_Port GPIOB
 #define LD3_Pin GPIO_PIN_14
@@ -87,6 +95,8 @@ void Error_Handler(void);
 #define USB_TX_GPIO_Port GPIOD
 #define USB_RX_Pin GPIO_PIN_9
 #define USB_RX_GPIO_Port GPIOD
+#define OLED_1_Pin GPIO_PIN_15
+#define OLED_1_GPIO_Port GPIOD
 #define DMX_OUT_Pin GPIO_PIN_5
 #define DMX_OUT_GPIO_Port GPIOD
 #define LD2_Pin GPIO_PIN_7

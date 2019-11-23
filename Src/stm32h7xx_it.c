@@ -27,6 +27,7 @@
 #include "dmxTask.h"
 #include "stm32h7xx_ll_gpio.h"
 #include "stm32h7xx_ll_dma.h"
+#include "displayTask.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -201,6 +202,30 @@ void TIM1_UP_IRQHandler(void)
     xEventGroupSetBitsFromISR(xPwmEventGroupHandle, PWMTASK_TIM_BIT, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
   /* USER CODE END TIM1_UP_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+  // Whether the button was pressed instead of de-pressed
+  uint8_t buttonWasPressed = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  if (buttonWasPressed) {
+      xEventGroupSetBitsFromISR(xButtonEventGroupHandle, DISPLAYTASK_PRESSED_BIT, &xHigherPriorityTaskWoken);
+  } else {
+      xEventGroupSetBitsFromISR(xButtonEventGroupHandle, DISPLAYTASK_RELEASED_BIT, &xHigherPriorityTaskWoken);
+  }
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
 /**
