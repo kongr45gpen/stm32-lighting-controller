@@ -79,6 +79,8 @@ void Error_Handler(void);
 #define USER_Btn_GPIO_Port GPIOC
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
+#define IGNORE_Pin GPIO_PIN_12
+#define IGNORE_GPIO_Port GPIOB
 #define LD3_Pin GPIO_PIN_14
 #define LD3_GPIO_Port GPIOB
 #define USB_TX_Pin GPIO_PIN_8

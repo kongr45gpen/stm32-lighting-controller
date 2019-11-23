@@ -33,7 +33,7 @@ void dmxTask(void *pvParameters) {
     LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, 513); // Set the amount of bytes to be transferred
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_0, (uint32_t) ((uint8_t*) dmxData),
                            LL_USART_DMA_GetRegAddr(USART2, LL_USART_DMA_REG_DATA_TRANSMIT),
-                           LL_DMA_DIRECTION_MEMORY_TO_PERIPH); // Set the To and From memory addresses
+                           LL_DMA_DIRECTION_MEMORY_TO_PERIPH); // Set the To and From memory addresses66
 
     // Start the timer counting for DMX pulses
     HAL_TIM_Base_Start_IT(&htim16);

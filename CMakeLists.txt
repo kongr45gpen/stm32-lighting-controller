@@ -36,15 +36,22 @@ set(CMAKE_CXX_STANDARD 11)
 
 #add_definitions(-DARM_MATH_CM4 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING -D__FPU_PRESENT=1)
 add_definitions(-D__weak=__attribute__\(\(weak\)\) -D__packed=__attribute__\(\(__packed__\)\) -DUSE_HAL_DRIVER -DSTM32H743xx)
+add_definitions(-DSTM32H7 -DSSD1306_USE_SPI -DSSD1306_SPI_PORT=hspi1
+        -DSSD1306_DC_Port=GPIOD -DSSD1306_DC_Pin=GPIO_PIN_15
+        -DSSD1306_Reset_Port=GPIOF -DSSD1306_Reset_Pin=GPIO_PIN_12
+        -DSSD1306_CS_Port=GPIOA -DSSD1306_CS_Pin=GPIO_PIN_4)
 
 file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Src/*.*" "Drivers_LL/*.*")
 
 # Support for FreeRTOS
 file(GLOB FREERTOS_SOURCES "Lib/freertos/*.c" "Lib/freertos/portable/GCC/ARM_CM7/r0p1/port.c" "Lib/freertos/portable/MemMang/heap_2.c")
 
+# Other libraries
+file (GLOB LIBRARY_SOURCES "Lib/stm32-ssd1306/ssd1306/*.c")
+
 include_directories(Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/STM32H7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include Drivers_LL/Inc)
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${FREERTOS_SOURCES} ${EXTRA_SOURCES} ${LINKER_SCRIPT})
+add_executable(${PROJECT_NAME}.elf ${SOURCES} ${FREERTOS_SOURCES} ${LIBRARY_SOURCES} ${EXTRA_SOURCES} ${LINKER_SCRIPT})
 
 set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
@@ -61,4 +68,5 @@ Building ${BIN_FILE}")
 include_directories(
         "${PROJECT_SOURCE_DIR}/Lib/freertos/include"
         "${PROJECT_SOURCE_DIR}/Lib/freertos/portable/GCC/ARM_CM7/r0p1"
+        "${PROJECT_SOURCE_DIR}/Lib/stm32-ssd1306/ssd1306"
 )
