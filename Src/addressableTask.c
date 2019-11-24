@@ -1,5 +1,6 @@
 #include "FreeRTOS.h"
 #include <task.h>
+#include <universe.h>
 #include "addressableTask.h"
 #include "stdint.h"
 #include "string.h"
@@ -9,7 +10,7 @@
 #include "stm32h7xx_ll_tim.h"
 
 
-static uint16_t ledCount = 2;
+static uint16_t ledCount = 3;
 static uint8_t ledColours = 4;
 static uint8_t bitDepth = 8;
 
@@ -17,6 +18,30 @@ static uint8_t bitDepth = 8;
 #define EMPTY_SIZE 80 // Number of low pulses to be sent
 #define DATA_SIZE (EMPTY_SIZE + ADDRESSABLE_LEDS_MAX)
 static uint16_t __attribute__((section (".sram"))) addressableValues[DATA_SIZE] = { 0 };
+
+void parseUniverse() {
+    // We assume that the first dmaData registers are left untouched as zero
+    for (size_t i = 0; i < ledCount * ledColours; i++) {
+        // The index of the current LED in the dmaValues array
+        uint32_t index = EMPTY_SIZE + bitDepth * i;
+        // Red and green are switched, take care of that
+        if (i % ledColours == 0) {
+            // Red
+            index += bitDepth;
+        } else if (i % ledColours == 1) {
+            // Green
+            index -= bitDepth;
+        }
+
+        uint8_t datum = universe[i]; // The data as declared in the universe
+
+        for (uint8_t bit = 0; bit < bitDepth; bit++) {
+            // Get the bit'th bit, and store 1 or 2 according to whether it's 0 or 1
+            addressableValues[index + bit] = ((datum >> (bitDepth - bit - 1U)) & 0x01U) ? 2 : 1;
+        }
+    }
+}
+
 
 /**
  * A task responsible for addressable LED strips based on the WS2812B chip
@@ -37,52 +62,10 @@ void addressableTask(void *pvParameters) {
     LL_TIM_EnableCounter(TIM15);
     LL_TIM_EnableAllOutputs(TIM15);
 
-    addressableValues[EMPTY_SIZE + 0] = 1;
-    addressableValues[EMPTY_SIZE + 1] = 1;
-    addressableValues[EMPTY_SIZE + 2] = 1;
-    addressableValues[EMPTY_SIZE + 3] = 1;
-    addressableValues[EMPTY_SIZE + 4] = 2;
-    addressableValues[EMPTY_SIZE + 5] = 2;
-    addressableValues[EMPTY_SIZE + 6] = 2;
-    addressableValues[EMPTY_SIZE + 7] = 2;
-
-    addressableValues[EMPTY_SIZE + 8 + 0] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 1] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 2] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 3] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 4] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 5] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 6] = 2;
-    addressableValues[EMPTY_SIZE + 8 + 7] = 2;
-
-    addressableValues[EMPTY_SIZE + 16 + 0] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 1] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 2] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 3] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 4] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 5] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 6] = 1;
-    addressableValues[EMPTY_SIZE + 16 + 7] = 2;
-
-    addressableValues[EMPTY_SIZE + 24 + 0] = 2;
-    addressableValues[EMPTY_SIZE + 24 + 1] = 1;
-    addressableValues[EMPTY_SIZE + 24 + 2] = 1;
-    addressableValues[EMPTY_SIZE + 24 + 3] = 1;
-    addressableValues[EMPTY_SIZE + 24 + 4] = 1;
-    addressableValues[EMPTY_SIZE + 24 + 5] = 1;
-    addressableValues[EMPTY_SIZE + 24 + 6] = 1;
-    addressableValues[EMPTY_SIZE + 24 + 7] = 1;
-
-    addressableValues[EMPTY_SIZE + 32 + 0] = 2;
-    addressableValues[EMPTY_SIZE + 32 + 1] = 1;
-    addressableValues[EMPTY_SIZE + 32 + 2] = 1;
-    addressableValues[EMPTY_SIZE + 32 + 3] = 1;
-    addressableValues[EMPTY_SIZE + 32 + 4] = 1;
-    addressableValues[EMPTY_SIZE + 32 + 5] = 1;
-    addressableValues[EMPTY_SIZE + 32 + 6] = 1;
-    addressableValues[EMPTY_SIZE + 32 + 7] = 1;
 
     while(1) {
-        vTaskDelay(2);
+        vTaskDelay(pdMS_TO_TICKS(1000 / 45)); // 45 fps refresh rate
+        parseUniverse();
+
     }
 }

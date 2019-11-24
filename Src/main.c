@@ -106,7 +106,7 @@ void pingTask( void *pvParameters ) {
 
         universe[0] = 255;
         universe[1] += 1;
-        universe[2] += 4;
+//        universe[2] += 4;
         universe[3] += 1;
         universe[10] += 1;
 //        universe[6] += 1;
