@@ -2,7 +2,9 @@
 #include <task.h>
 #include "addressableTask.h"
 #include "stdint.h"
+#include "string.h"
 
+#include "stm32h7xx_ll_mdma.h"
 #include "stm32h7xx_ll_dma.h"
 #include "stm32h7xx_ll_tim.h"
 
@@ -12,22 +14,39 @@ static uint8_t ledColours = 4;
 static uint8_t bitDepth = 8;
 
 #define ADDRESSABLE_LEDS_MAX 1000
-static uint8_t __attribute__((section (".sram"))) addressableValues[ADDRESSABLE_LEDS_MAX] = { 10, 35, 99, 13, 53, 12, 128, 190, 150, 20 };
+#define EMPTY_SIZE 50 // Number of low pulses to be sent
+#define DATA_SIZE (EMPTY_SIZE + ADDRESSABLE_LEDS_MAX)
+static uint32_t __attribute__((section (".sram"))) addressableValues[DATA_SIZE] = { 0 };
 
 /**
- * A task responsible for addressable LED strips
+ * A task responsible for addressable LED strips based on the WS2812B chip
  * @param pvParameters
  */
 void addressableTask(void *pvParameters) {
+    memset(addressableValues, 0, sizeof(addressableValues));
+
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_1, (uint32_t) addressableValues, // Memory address of the buffer
                            (uint32_t) (&(TIM15->CCR1)),
                            LL_DMA_DIRECTION_MEMORY_TO_PERIPH); // Send message from memory to the USART Data Register
-    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, ledCount * ledColours); // Set amount of copied bits for DMA
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, DATA_SIZE); // Set amount of copied bits for DMA
+
+//    LL_MDMA_ConfigAddresses(MDMA, LL_MDMA_CHANNEL_0, (uint32_t) addressableValues, // Memory address of the buffer
+//                            (uint32_t) (&(TIM15->CCR1)));
+//    LL_MDMA_SetSourceDataSize(MDMA, LL_MDMA_CHANNEL_0, DATA_SIZE);
 
     LL_TIM_EnableDMAReq_CC1(TIM15);              /* Enable DMA requests on channel 1 */
     LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
+//    LL_MDMA_EnableChannel(MDMA, LL_MDMA_CHANNEL_0);
     LL_TIM_CC_EnableChannel(TIM15, LL_TIM_CHANNEL_CH1);
     LL_TIM_EnableCounter(TIM15);
+    LL_TIM_EnableAllOutputs(TIM15);
+
+    addressableValues[EMPTY_SIZE + 0] = 1;
+    addressableValues[EMPTY_SIZE + 1] = 1;
+    addressableValues[EMPTY_SIZE + 2] = 1;
+    addressableValues[EMPTY_SIZE + 3] = 2;
+    addressableValues[EMPTY_SIZE + 4] = 2;
+    addressableValues[EMPTY_SIZE + 5] = 2;
 
     while(1) {
         vTaskDelay(2);
