@@ -65,7 +65,6 @@ UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart2_tx;
 
 MDMA_HandleTypeDef hmdma_mdma_channel40_dma1_stream1_tc_0;
-MDMA_LinkNodeTypeDef node_mdma_channel40_dma1_stream1_tc_1;
 /* USER CODE BEGIN PV */
 xTaskHandle pwmTaskHandle;
 xTaskHandle dmxTaskHandle;
@@ -823,7 +822,6 @@ static void MX_DMA_Init(void)
   * Enable MDMA controller clock
   * Configure MDMA for global transfers
   *   hmdma_mdma_channel40_dma1_stream1_tc_0
-  *   node_mdma_channel40_dma1_stream1_tc_1
   */
 static void MX_MDMA_Init(void) 
 {
@@ -831,13 +829,12 @@ static void MX_MDMA_Init(void)
   /* MDMA controller clock enable */
   __HAL_RCC_MDMA_CLK_ENABLE();
   /* Local variables */
-  MDMA_LinkNodeConfTypeDef nodeConfig;
 
   /* Configure MDMA channel MDMA_Channel0 */
   /* Configure MDMA request hmdma_mdma_channel40_dma1_stream1_tc_0 on MDMA_Channel0 */
   hmdma_mdma_channel40_dma1_stream1_tc_0.Instance = MDMA_Channel0;
   hmdma_mdma_channel40_dma1_stream1_tc_0.Init.Request = MDMA_REQUEST_DMA1_Stream1_TC;
-  hmdma_mdma_channel40_dma1_stream1_tc_0.Init.TransferTriggerMode = MDMA_BUFFER_TRANSFER;
+  hmdma_mdma_channel40_dma1_stream1_tc_0.Init.TransferTriggerMode = MDMA_REPEAT_BLOCK_TRANSFER;
   hmdma_mdma_channel40_dma1_stream1_tc_0.Init.Priority = MDMA_PRIORITY_LOW;
   hmdma_mdma_channel40_dma1_stream1_tc_0.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
   hmdma_mdma_channel40_dma1_stream1_tc_0.Init.SourceInc = MDMA_SRC_INC_BYTE;
@@ -851,51 +848,6 @@ static void MX_MDMA_Init(void)
   hmdma_mdma_channel40_dma1_stream1_tc_0.Init.SourceBlockAddressOffset = 0;
   hmdma_mdma_channel40_dma1_stream1_tc_0.Init.DestBlockAddressOffset = 0;
   if (HAL_MDMA_Init(&hmdma_mdma_channel40_dma1_stream1_tc_0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* Initialize MDMA link node according to specified parameters */
-  nodeConfig.Init.Request = MDMA_REQUEST_DMA1_Stream1_TC;
-  nodeConfig.Init.TransferTriggerMode = MDMA_BUFFER_TRANSFER;
-  nodeConfig.Init.Priority = MDMA_PRIORITY_LOW;
-  nodeConfig.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
-  nodeConfig.Init.SourceInc = MDMA_SRC_INC_BYTE;
-  nodeConfig.Init.DestinationInc = MDMA_DEST_INC_DISABLE;
-  nodeConfig.Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
-  nodeConfig.Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
-  nodeConfig.Init.DataAlignment = MDMA_DATAALIGN_RIGHT;
-  nodeConfig.Init.BufferTransferLength = 1;
-  nodeConfig.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
-  nodeConfig.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
-  nodeConfig.Init.SourceBlockAddressOffset = 0;
-  nodeConfig.Init.DestBlockAddressOffset = 0;
-  nodeConfig.PostRequestMaskAddress = 0;
-  nodeConfig.PostRequestMaskData = 0;
-  /* Template to be copied and modified in the user code section below */
-  /* Please give a value to the following parameters set by default to 0 */
-  /*
-  nodeConfig.SrcAddress = 0;
-  nodeConfig.DstAddress = 0;
-  nodeConfig.BlockDataLength = 0;
-  nodeConfig.BlockCount = 0;
-  if (HAL_MDMA_LinkedList_CreateNode(&node_mdma_channel40_dma1_stream1_tc_1, &nodeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  */
-  /* USER CODE BEGIN mdma_channel40_dma1_stream1_tc_1 */
-
-  /* USER CODE END mdma_channel40_dma1_stream1_tc_1 */
-
-  /* Connect a node to the linked list */
-  if (HAL_MDMA_LinkedList_AddNode(&hmdma_mdma_channel40_dma1_stream1_tc_0, &node_mdma_channel40_dma1_stream1_tc_1, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* Make the linked list circular by connecting the last node to the first */
-  if (HAL_MDMA_LinkedList_EnableCircularMode(&hmdma_mdma_channel40_dma1_stream1_tc_0) != HAL_OK)
   {
     Error_Handler();
   }
