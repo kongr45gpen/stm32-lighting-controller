@@ -2,5 +2,7 @@
 #define STM32_LIGHTING_CONTROLLER_COMMANDS_H
 
 void CommandTest();
+void CommandBlackout();
+void CommandReset();
 
 #endif //STM32_LIGHTING_CONTROLLER_COMMANDS_H

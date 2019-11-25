@@ -68,8 +68,10 @@ static void runFunction(uint8_t function) {
         modeDisplay = eModeFlash;
     } else if (function == 1) { // Reset
         modeDisplay = eModeReady;
+        CommandReset();
     } else if (function == 2) { // Blackout
         modeDisplay = eModeBlackout;
+        CommandBlackout();
     } else if (function == 0) { // Check
         modeDisplay = eModeCheck;
         CommandTest();

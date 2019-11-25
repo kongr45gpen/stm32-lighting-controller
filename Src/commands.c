@@ -54,3 +54,18 @@ void CommandTest() {
         xTaskCreate(testTask, "test", 200, NULL, 1, NULL);
     }
 }
+
+/**
+ * Permanently black out the universe of lights. A restart will be required to un-blackout
+ */
+void CommandBlackout() {
+    temporaryBlackout();
+    universeIsWritable = false;
+}
+
+/**
+ * Reset the microcontroller via software
+ */
+void CommandReset() {
+    HAL_NVIC_SystemReset();
+}
