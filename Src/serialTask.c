@@ -29,6 +29,9 @@ void USART3_RXHandler(UART_HandleTypeDef *huart) {
     xStreamBufferSendFromISR(xSerialReceiveBufferHandle, &datum, 1, &xHigherPriorityTaskWoken);
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+    // Blink the requested LED
+    HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
 }
 
 // The current channel being edited
@@ -125,6 +128,9 @@ void serialReadTask(void *pvParameters) {
                     currentCommand = eIdleCommand;
                 }
             }
+
+            // Unblink the LED
+            HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
         }
     }
 }

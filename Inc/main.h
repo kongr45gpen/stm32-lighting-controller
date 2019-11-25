@@ -88,6 +88,8 @@ void Error_Handler(void);
 #define MCO_GPIO_Port GPIOH
 #define SPI1_NSS_Pin GPIO_PIN_4
 #define SPI1_NSS_GPIO_Port GPIOA
+#define LD1_Pin GPIO_PIN_0
+#define LD1_GPIO_Port GPIOB
 #define OLED_2_Pin GPIO_PIN_12
 #define OLED_2_GPIO_Port GPIOF
 #define IGNORE_Pin GPIO_PIN_12
