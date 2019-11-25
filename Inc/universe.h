@@ -36,6 +36,11 @@ inline void setValue(uint16_t channel, uint8_t value) {
 }
 
 /**
+ * Notify watching tasks that the universe has changed
+ */
+void notifyUniverseUpdate();
+
+/**
  * Black out (set to 0) all the channels of the universe for an instant
  */
 void temporaryBlackout();

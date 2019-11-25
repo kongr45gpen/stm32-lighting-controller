@@ -39,6 +39,19 @@ void USART3_RXHandler(UART_HandleTypeDef *huart) {
     HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
 }
 
+void HAL_UARTEx_RxFifoFullCallback(UART_HandleTypeDef *huart) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    // Throw an error message
+    static const char message[256] = "RX fifo is full, you are sending data too fast!";
+    xQueueSendFromISR(xErrorQueueHandle, message, &xHigherPriorityTaskWoken);
+
+    // Flush the FIFO for good measure
+    LL_USART_RequestRxDataFlush(USART3);
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
 // The current channel being edited
 static uint16_t currentUniverseChannel = 0;
 /**
@@ -62,6 +75,9 @@ bool UniverseCommand(uint8_t datum) {
         // Reset the counter in case the user provides circular data
         currentUniverseChannel = 0;
 
+        // Notify that the universe was updated
+        notifyUniverseUpdate();
+
         // We cannot receive any further channel data.
         return false;
     }
@@ -72,8 +88,9 @@ void serialReadTask(void *pvParameters) {
     // Register the manual handlers of USART3
     huart3.RxISR = USART3_RXHandler;
 
-    // We need to enable the USART3 reception interrupt
+    // Enable USART3 reception and error interrupts
     LL_USART_EnableIT_RXNE_RXFNE(USART3);
+    LL_USART_EnableIT_RXFF(USART3);
 
     // A variable to define the command we are currently receiving
     static enum {
@@ -96,6 +113,13 @@ void serialReadTask(void *pvParameters) {
                 justReceivedOp = true;
             } else if (justReceivedOp && datum != SERIAL_COM_OP) {
                 // Time for a new command to be received. We can parse it
+
+                if (currentCommand == eUniverseCommand) {
+                    // The previous command was the universe command, but it finished. Make sure to send a DMX universe
+                    // update
+                    notifyUniverseUpdate();
+                }
+
                 switch (datum) {
                     case SERIAL_COM_DMX:
                         // Received DMX command, just move the state and let the rest of the data be parsed
@@ -112,7 +136,8 @@ void serialReadTask(void *pvParameters) {
                         // Unknown command received
                         currentCommand = eUnknownCommand;
 
-                        char message[ERROR_MESSAGE_SIZE] = "Unknown command received";
+                        char message[ERROR_MESSAGE_SIZE];
+                        snprintf(message, ERROR_MESSAGE_SIZE, "Unknown command received: %x (%c)", datum, datum);
                         addErrorMessage(message, 0);
                 }
 

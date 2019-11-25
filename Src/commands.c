@@ -32,6 +32,8 @@ void testTask(void * pvParameters) {
             universe[i + 1] = 255;
         }
 
+        notifyUniverseUpdate();
+
         vTaskDelay(pdMS_TO_TICKS(1000 / 30)); // Try to get close to the DMX refresh rate (we have 30 fps)
     }
 

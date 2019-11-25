@@ -2,9 +2,11 @@
 #include <task.h>
 #include <stdlib.h>
 #include <universe.h>
+#include <stm32h7xx_ll_gpio.h>
 #include "pwmTask.h"
 #include "main.h"
 #include "stm32h7xx.h"
+#include "stm32h7xx_ll_tim.h"
 
 // The exponential gamma 2factor that defines how non-linear the lighting curve is.
 // A value of 0 means linear change
@@ -28,7 +30,7 @@ volatile uint32_t * pwmChannels[16] = {
  * A task responsible for all PWM outputs of the board
  */
 void pwmTask( void *pvParameters ) {
-    static TIM_HandleTypeDef * usedTimers[4] = {
+    static TIM_HandleTypeDef * usedTimers[] = {
             &htim1, &htim2, &htim3, &htim4
     };
 
@@ -53,6 +55,13 @@ void pwmTask( void *pvParameters ) {
         HAL_TIM_PWM_Start(usedTimers[i], TIM_CHANNEL_4);
     }
 
+    // Special TIM17 initialization
+    LL_TIM_SetPrescaler(TIM17, prescaler);
+    LL_TIM_SetAutoReload(TIM17, period);
+    LL_TIM_EnableCounter(TIM17);
+    LL_TIM_CC_EnableChannel(TIM17, LL_TIM_CHANNEL_CH1N);
+    LL_TIM_EnableAllOutputs(TIM17);
+
     while (1) {
         // Precalculate (e^gam - 1) for later
         float exp_gam = expf(gam) - 1;
@@ -70,7 +79,15 @@ void pwmTask( void *pvParameters ) {
             (*(pwmChannels[i])) = normalised * 4095;
         }
 
+        // Also set the debug indicator LED
+        // TODO: Exponential curving here
+        TIM17->CCR1 = universe[0];
+
+        // Flash an indicator LED
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+//        LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_7, LL_GPIO_MODE_OUTPUT);
+//        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_7);
+//        LL_TIM_OC_SetMode(TIM17, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_FORCED_INACTIVE);
 
         // Wait until the next timer interrupt
         xEventGroupWaitBits(xPwmEventGroupHandle, PWMTASK_TIM_BIT | PWMTASK_UPDATE_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
