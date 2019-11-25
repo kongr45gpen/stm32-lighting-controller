@@ -34,7 +34,7 @@ static void redraw() {
 
     // Screen structure initialisation
     ssd1306_SetCursor(1, 0);
-    ssd1306_WriteString("silight 0.1", Font_7x10, White);
+    ssd1306_WriteString("artlight 0.1", Font_7x10, White);
 
     // Draw the rectangle around the DMX values
     for (int i = RECT_0_X; i <= RECT_1_X; i++) {
@@ -148,9 +148,9 @@ void displayTask(void *pvParameters) {
         ssd1306_WriteString(modeText, Font_11x18, White);
 
         // Show a refresh rate indicator to let the user know if the screen is being updated
-        ssd1306_SetCursor(80, 0); // Draw next to the title
+        ssd1306_SetCursor(85, 0); // Draw next to the title
         static uint8_t refreshRateIndicator = 0; // A boolean that is toggled every time
-        ssd1306_WriteChar(refreshRateIndicator ? '.' : ' ', Font_7x10, White); // Write a dot for the update
+        ssd1306_WriteChar(refreshRateIndicator ? '\'' : ' ', Font_7x10, White); // Write a dot for the update
         refreshRateIndicator = !refreshRateIndicator; // Reset the value for the next iteration
 
         // Draw the universe channel values as boxes with different heights according to the values
