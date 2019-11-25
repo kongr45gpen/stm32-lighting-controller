@@ -99,13 +99,13 @@ static void MX_MDMA_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void pingTask( void *pvParameters ) {
-    static char string[512];
+    static char string[DMX_MAX];
 
     universe[2] += 2;
     universe[3] += 4;
 
     while(1) {
-        uint8_t strlen = snprintf(string, 512, "%lu Hello World\r\n", xTaskGetTickCount());
+        uint8_t strlen = snprintf(string, DMX_MAX, "%lu Hello World\r\n", xTaskGetTickCount());
 
         HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
 

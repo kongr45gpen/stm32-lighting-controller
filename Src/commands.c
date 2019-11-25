@@ -28,7 +28,7 @@ void testTask(void * pvParameters) {
 
         // Make current values full
         universe[i] = 255;
-        if (i + 1 < 512) {
+        if (i + 1 < DMX_MAX) {
             universe[i + 1] = 255;
         }
 
@@ -36,8 +36,8 @@ void testTask(void * pvParameters) {
     }
 
     // Reset the two final values
-    if (i - 1 < 512) universe[i - 1] = 0;
-    if (i < 512) universe[i] = 0;
+    if (i - 1 < DMX_MAX) universe[i - 1] = 0;
+    if (i < DMX_MAX) universe[i] = 0;
 
     // Cleanup
     testRunning = false;

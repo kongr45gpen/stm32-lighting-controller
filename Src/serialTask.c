@@ -51,7 +51,7 @@ bool UniverseCommand(uint8_t datum) {
     size_t len = snprintf(string, 256, "Writing %d to channel %d\r\n", datum, currentUniverseChannel);
     HAL_UART_Transmit(&huart3,string,len,1000);
 
-    if (currentUniverseChannel < 512 - 1) {
+    if (currentUniverseChannel < DMX_MAX - 1) {
         // The next byte we receive will be for the next channel
         currentUniverseChannel++;
 

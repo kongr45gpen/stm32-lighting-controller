@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include "stdint.h"
 
+// The maximum number of DMX channels per DMX universe. Also used for the internal universe representation
+#define DMX_MAX 512
+
 /**
  * Whether the universe is editable (through serial or wireless) and not disabled by an internal reason
  */
@@ -12,7 +15,7 @@ extern bool universeIsWritable;
 /**
  * DMX values for all DMX channels, 1-512
  */
-extern uint8_t universe[512];
+extern uint8_t universe[DMX_MAX];
 
 /**
  * Get a DMX value

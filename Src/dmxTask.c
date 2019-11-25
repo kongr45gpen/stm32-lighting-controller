@@ -19,7 +19,7 @@
 void dmxTask(void *pvParameters) {
     // The dmx data to be transmitted. This is a different value from universe, to account for the status code and
     // any other modifications to the universe data
-    static uint8_t __attribute__((section (".sram"))) dmxData[513];
+    static uint8_t __attribute__((section (".sram"))) dmxData[DMX_MAX + 1];
 
     // Enable the DMA Transmission Complete interrupt
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_0);
@@ -30,7 +30,7 @@ void dmxTask(void *pvParameters) {
 
     // Set some global DMA parameters
     LL_USART_EnableDMAReq_TX(USART2); // Tell the USART2 peripheral to enable the DMA request
-    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, 513); // Set the amount of bytes to be transferred
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, DMX_MAX + 1); // Set the amount of bytes to be transferred
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_0, (uint32_t) ((uint8_t*) dmxData),
                            LL_USART_DMA_GetRegAddr(USART2, LL_USART_DMA_REG_DATA_TRANSMIT),
                            LL_DMA_DIRECTION_MEMORY_TO_PERIPH); // Set the To and From memory addresses66
@@ -48,7 +48,7 @@ void dmxTask(void *pvParameters) {
 
             // First, copy the universe to the dmxdata, performing any necessary changes
             dmxData[0] = 0; // DMX packet type is 0, according to the spec
-            memcpy(dmxData + 1, universe, 513); // Copy the rest 512 channels
+            memcpy(dmxData + 1, universe, DMX_MAX + 1); // Copy the rest 512 channels
 
             // Start the DMA transaction
             LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
