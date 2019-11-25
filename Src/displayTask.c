@@ -3,6 +3,7 @@
 #include <string.h>
 #include <main.h>
 #include <universe.h>
+#include <commands.h>
 #include "displayTask.h"
 #include "ssd1306.h"
 
@@ -71,6 +72,7 @@ static void runFunction(uint8_t function) {
         modeDisplay = eModeBlackout;
     } else if (function == 0) { // Check
         modeDisplay = eModeCheck;
+        CommandTest();
     }
 }
 

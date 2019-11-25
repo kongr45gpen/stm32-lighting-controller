@@ -17,4 +17,19 @@ extern enum ModeDisplay modeDisplay;
 
 void displayTask(void * pvParameters);
 
+/**
+ * Reset the currently displayed mode on the screen
+ */
+static inline void displayModeReset() {
+    modeDisplay = eModeReady;
+}
+
+/**
+ * Set the currently displayed mode on the screen to a new value
+ * @param newDisplayMode
+ */
+static inline void displayModeSet(enum ModeDisplay newDisplayMode) {
+    modeDisplay = newDisplayMode;
+}
+
 #endif //STM32_LIGHTING_CONTROLLER_DISPLAYTASK_H
