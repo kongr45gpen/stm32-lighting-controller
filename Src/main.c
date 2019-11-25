@@ -33,6 +33,7 @@
 #include "addressableTask.h"
 #include "serialTask.h"
 #include "stm32h7xx_it.h"
+#include "stm32h7xx_ll_usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -171,6 +172,15 @@ int main(void)
   MX_MDMA_Init();
   /* USER CODE BEGIN 2 */
     HAL_UART_Transmit(&huart3, (uint8_t *) "Hello welrd\r\n", strlen("Hello welrd\r\n"), HAL_MAX_DELAY);
+
+    // Workaround for a bug in the STM32H7 HAL library, which does not properly handle error interrupts for the UART3
+    // peripheral. Error interrupts are apparently always enabled when Multi Buffer Communication is enabled, but this
+    // is not considered in the HAL interrupt handler. As the interrupt handler bypasses the interrupt flag clear,
+    // the interrupt function runs in an infinite loop and halts the program. Here we enable the error interrupt flag
+    // for multi-buffer communication, so that HAL thinks it's enabled.
+    LL_USART_EnableIT_ERROR(USART3);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -791,7 +801,8 @@ static void MX_USART3_UART_Init(void)
   huart3.Init.OverSampling = UART_OVERSAMPLING_16;
   huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart3.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_RXOVERRUNDISABLE_INIT;
+  huart3.AdvancedInit.OverrunDisable = UART_ADVFEATURE_OVERRUN_DISABLE;
   if (HAL_UART_Init(&huart3) != HAL_OK)
   {
     Error_Handler();
