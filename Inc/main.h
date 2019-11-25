@@ -36,6 +36,7 @@ extern "C" {
 #include "task.h"
 #include <event_groups.h>
 #include <semphr.h>
+#include <stream_buffer.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -56,6 +57,8 @@ extern xTaskHandle dmxTaskHandle;
 // FreeRTOS resource handles
 extern EventGroupHandle_t xPwmEventGroupHandle;
 extern EventGroupHandle_t xButtonEventGroupHandle;
+extern EventGroupHandle_t xSerialEventGroupHandle;
+extern StreamBufferHandle_t xSerialReceiveBufferHandle;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

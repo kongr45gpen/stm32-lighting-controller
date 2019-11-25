@@ -25,11 +25,14 @@
 /* USER CODE BEGIN Includes */
 #include "FreeRTOS.h"
 #include "task.h"
+#include <stream_buffer.h>
 #include "pwmTask.h"
 #include "universe.h"
 #include "dmxTask.h"
 #include "displayTask.h"
 #include "addressableTask.h"
+#include "serialTask.h"
+#include "stm32h7xx_it.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,6 +73,8 @@ xTaskHandle pwmTaskHandle;
 xTaskHandle dmxTaskHandle;
 EventGroupHandle_t xPwmEventGroupHandle;
 EventGroupHandle_t xButtonEventGroupHandle;
+EventGroupHandle_t xSerialEventGroupHandle;
+StreamBufferHandle_t xSerialReceiveBufferHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,7 +117,7 @@ void pingTask( void *pvParameters ) {
 //        universe[6] += 1;
         xEventGroupSetBits(xPwmEventGroupHandle, PWMTASK_UPDATE_BIT);
 
-//        vTaskDelay(pdMS_TO_TICKS(2));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 /* USER CODE END 0 */
@@ -145,6 +150,7 @@ int main(void)
     // Since SystemClock_Config reinitializes the system tick, disable it again
     SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
 
+    // Enable the DMA1 clock, since the order of initialization of STM32CubeMX is wrong
     __HAL_RCC_DMA1_CLK_ENABLE();
   /* USER CODE END SysInit */
 
@@ -168,17 +174,22 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    // Re-enable the system clock
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 
     xPwmEventGroupHandle = xEventGroupCreate();
     xButtonEventGroupHandle = xEventGroupCreate();
+    xSerialEventGroupHandle = xEventGroupCreate();
+    xSerialReceiveBufferHandle = xStreamBufferCreate(16, 1);
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
     xTaskCreate(dmxTask, "dmx", 500, NULL, 4, &dmxTaskHandle);
     xTaskCreate(pwmTask, "PWM", 1000, NULL, 2, &pwmTaskHandle);
     xTaskCreate(displayTask, "display", 10000, NULL, 1, NULL);
     xTaskCreate(addressableTask, "address", 1000, NULL, 1, NULL);
+    xTaskCreate(serialReadTask, "serialR", 1000, NULL, 1, NULL);
+
+    // Re-enable the system clock
+    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+
     vTaskStartScheduler();
     /* USER CODE END WHILE */
 
@@ -301,7 +312,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -785,11 +796,11 @@ static void MX_USART3_UART_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart3, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart3, UART_RXFIFO_THRESHOLD_8_8) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_DisableFifoMode(&huart3) != HAL_OK)
+  if (HAL_UARTEx_EnableFifoMode(&huart3) != HAL_OK)
   {
     Error_Handler();
   }
