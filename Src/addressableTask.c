@@ -4,12 +4,14 @@
 #include "addressableTask.h"
 #include "stdint.h"
 #include "string.h"
+#include "stdbool.h"
 
 #include "stm32h7xx_ll_dma.h"
 #include "stm32h7xx_ll_tim.h"
 
 // Some variables for led strip details that are modifiable by end users
-static uint16_t ledCount = 30 * 3;
+static uint16_t ledCount = 30 * 5;
+static uint16_t blockSize = 30 * 2;
 static uint8_t ledColours = 4;
 static const uint8_t bitDepth = 8;
 
@@ -37,7 +39,15 @@ void parseUniverse() {
             index -= bitDepth;
         }
 
-        uint8_t datum = universe[i]; // The data as declared in the universe
+        uint8_t datum; // The data as declared in the universe
+        if (blockSize <= 1) {
+            // If we have individual access to the LEDS, just use the universe value
+            datum = universe[i];
+        } else {
+            uint16_t colour = i % ledColours;
+            uint16_t block = i / ledColours / blockSize;
+            datum = universe[colour + block * ledColours];
+        }
 
         for (uint8_t bit = 0; bit < bitDepth; bit++) {
             // Get the bit'th bit, and store 1 or 2 according to whether it's 0 or 1
@@ -73,6 +83,9 @@ void addressableTask(void *pvParameters) {
     LL_TIM_CC_EnableChannel(TIM15, LL_TIM_CHANNEL_CH1);
     LL_TIM_EnableCounter(TIM15);
     LL_TIM_EnableAllOutputs(TIM15);
+
+    // Some time for the data to settle
+    vTaskDelay(5);
 
     // Store the last wake time for the delay
     TickType_t xLastWakeTime = xTaskGetTickCount();

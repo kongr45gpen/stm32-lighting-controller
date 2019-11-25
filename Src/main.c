@@ -101,8 +101,8 @@ static void MX_MDMA_Init(void);
 void pingTask( void *pvParameters ) {
     static char string[DMX_MAX];
 
-    universe[2] += 2;
-    universe[3] += 4;
+    universe[0] += 1;
+    universe[1] += 1;
 
     while(1) {
         uint8_t strlen = snprintf(string, DMX_MAX, "%lu Hello World\r\n", xTaskGetTickCount());
@@ -174,6 +174,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+    // Initialize the universe
+    temporaryBlackout();
 
     xPwmEventGroupHandle = xEventGroupCreate();
     xButtonEventGroupHandle = xEventGroupCreate();
@@ -778,7 +780,7 @@ static void MX_USART3_UART_Init(void)
 
   /* USER CODE END USART3_Init 1 */
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 2000000;
+  huart3.Init.BaudRate = 115200;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;
@@ -796,7 +798,7 @@ static void MX_USART3_UART_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart3, UART_RXFIFO_THRESHOLD_8_8) != HAL_OK)
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart3, UART_RXFIFO_THRESHOLD_1_2) != HAL_OK)
   {
     Error_Handler();
   }
