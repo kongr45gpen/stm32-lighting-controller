@@ -48,7 +48,7 @@ void dmxTask(void *pvParameters) {
 
             // First, copy the universe to the dmxdata, performing any necessary changes
             dmxData[0] = 0; // DMX packet type is 0, according to the spec
-            memcpy(dmxData + 1, universe, DMX_MAX + 1); // Copy the rest 512 channels
+            memcpy(dmxData + 1, universe, DMX_MAX); // Copy the rest 512 channels
 
             // Start the DMA transaction
             LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);

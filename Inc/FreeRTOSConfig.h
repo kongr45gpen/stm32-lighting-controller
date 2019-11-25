@@ -13,7 +13,7 @@
 #define configMINIMAL_STACK_SIZE		( ( unsigned short ) 130 )
 #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 100 * 1024 ) )
 #define configMAX_TASK_NAME_LEN			( 10 )
-#define configUSE_TRACE_FACILITY		0
+#define configUSE_TRACE_FACILITY		1
 #define configUSE_16_BIT_TICKS			0
 #define configIDLE_SHOULD_YIELD			1
 #define configUSE_MUTEXES				1
@@ -24,11 +24,12 @@
 #define configUSE_APPLICATION_TASK_TAG	0
 #define configUSE_COUNTING_SEMAPHORES	1
 #define configSUPPORT_STATIC_ALLOCATION 1
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
 
 /* Debugging configurations */
-#define configGENERATE_RUN_TIME_STATS   0
+#define configGENERATE_RUN_TIME_STATS   1
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
-#define portGET_RUN_TIME_COUNTER_VALUE()           uwTick
+#define portGET_RUN_TIME_COUNTER_VALUE()           xTaskGetTickCount()
 
 
 /* Co-routine definitions. */

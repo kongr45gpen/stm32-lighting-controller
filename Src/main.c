@@ -34,6 +34,8 @@
 #include "serialTask.h"
 #include "stm32h7xx_it.h"
 #include "stm32h7xx_ll_usart.h"
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -124,9 +126,13 @@ void pingTask( void *pvParameters ) {
     universe[1] += 1;
 
     while(1) {
-        uint8_t strlen = snprintf(string, DMX_MAX, "%lu Hello World\r\n", xTaskGetTickCount());
+        uint8_t strleng = snprintf(string, DMX_MAX, "%lu Hello Worldd\r\n", xTaskGetTickCount());
 
-        HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart3, string, strleng, HAL_MAX_DELAY);
+
+        static char buffer[40 * 20];
+        vTaskGetRunTimeStats(buffer);
+        HAL_UART_Transmit(&huart3, buffer, strlen(buffer), HAL_MAX_DELAY);
 
 //        universe[0] = 255;
 //        universe[1] += 1;
