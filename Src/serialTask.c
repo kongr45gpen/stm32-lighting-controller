@@ -43,7 +43,9 @@ static uint16_t currentUniverseChannel = 0;
  */
 bool UniverseCommand(uint8_t datum) {
     // Set the value of the universe channel based on the data provided by the serial port
-    universe[currentUniverseChannel] = datum;
+    if (universeIsWritable) {
+        universe[currentUniverseChannel] = datum;
+    }
 
     static uint8_t string [256];
     size_t len = snprintf(string, 256, "Writing %d to channel %d\r\n", datum, currentUniverseChannel);
@@ -76,7 +78,7 @@ void serialReadTask(void *pvParameters) {
     static enum {
         eIdleCommand, ///< No command currently in progress
         eUniverseCommand, ///< Receiving DMX universe data
-        eUnknownCommand ///< Unknown command received, doing nothing and asking questions
+        eUnknownCommand, ///< Unknown command received, doing nothing and asking questions
     } currentCommand = eIdleCommand;
 
     // Whether we just received an operation code

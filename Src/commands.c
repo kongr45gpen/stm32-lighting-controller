@@ -12,11 +12,13 @@
 // Assume booleans are atomic
 static bool testRunning = false;
 
-
-
 void testTask(void * pvParameters) {
     // Initialisation
     testRunning = true;
+    universeIsWritable = false;
+
+    // First, black out all channels
+    temporaryBlackout();
 
     int i;
     for (i = 0; i < 100; i++) {
@@ -39,6 +41,7 @@ void testTask(void * pvParameters) {
 
     // Cleanup
     testRunning = false;
+    universeIsWritable = true;
     displayModeReset(); // Reset the mode shown on the screen
     vTaskDelete(NULL); // Delete myself
 }

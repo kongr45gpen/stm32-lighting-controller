@@ -109,11 +109,11 @@ void pingTask( void *pvParameters ) {
 
         HAL_UART_Transmit(&huart3, string, strlen, HAL_MAX_DELAY);
 
-        universe[0] = 255;
-        universe[1] += 1;
+//        universe[0] = 255;
+//        universe[1] += 1;
 //        universe[2] += 4;
-        universe[3] += 1;
-        universe[10] += 1;
+//        universe[3] += 1;
+//        universe[10] += 1;
 //        universe[6] += 1;
         xEventGroupSetBits(xPwmEventGroupHandle, PWMTASK_UPDATE_BIT);
 
