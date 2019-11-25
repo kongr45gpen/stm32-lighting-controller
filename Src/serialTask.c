@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <universe.h>
 #include <displayTask.h>
+#include <stm32h7xx_ll_gpio.h>
 #include "serialTask.h"
 #include "stm32h7xx_ll_usart.h"
 #include "stdio.h"
@@ -17,7 +18,7 @@
  * by HAL_UART_IRQHandler, since that function automatically performs all the checks needed to see if we have received
  * data without errors.
  */
-void USART3_RXHandler(UART_HandleTypeDef *huart) {
+void USART3_RXHandler() {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     // Notify the task that we have new data
@@ -36,10 +37,13 @@ void USART3_RXHandler(UART_HandleTypeDef *huart) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
     // Blink the requested LED
-    HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+    LL_GPIO_SetOutputPin(LD1_GPIO_Port, LL_GPIO_PIN_0);
 }
 
-void HAL_UARTEx_RxFifoFullCallback(UART_HandleTypeDef *huart) {
+/**
+ * Function to call when a FIFO overrun occurs on reception in USART3
+ */
+void USART3_OERHandler() {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     // Throw an error message
@@ -83,11 +87,7 @@ bool UniverseCommand(uint8_t datum) {
     }
 }
 
-
 void serialReadTask(void *pvParameters) {
-    // Register the manual handlers of USART3
-    huart3.RxISR = USART3_RXHandler;
-
     // Enable USART3 reception and error interrupts
     LL_USART_EnableIT_RXNE_RXFNE(USART3);
     LL_USART_EnableIT_RXFF(USART3);

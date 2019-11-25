@@ -6,4 +6,7 @@
 
 void serialReadTask(void * pvParameters);
 
+void USART3_RXHandler();
+void USART3_OERHandler();
+
 #endif //STM32_LIGHTING_CONTROLLER_SERIALTASK_H

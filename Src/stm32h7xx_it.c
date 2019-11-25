@@ -27,7 +27,9 @@
 #include "dmxTask.h"
 #include "stm32h7xx_ll_gpio.h"
 #include "stm32h7xx_ll_dma.h"
+#include "stm32h7xx_ll_usart.h"
 #include "displayTask.h"
+#include <serialTask.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -226,9 +228,24 @@ void TIM1_UP_IRQHandler(void)
 void USART3_IRQHandler(void)
 {
   /* USER CODE BEGIN USART3_IRQn 0 */
+    uint32_t isrflags   = READ_REG(USART3->ISR);
+    uint32_t errorflags = (isrflags & (uint32_t)(USART_ISR_PE | USART_ISR_FE | USART_ISR_ORE | USART_ISR_NE | USART_ISR_RTOF));
 
+    if (0 != errorflags) {
+        // An error occurred.
+        if (LL_USART_IsActiveFlag_ORE(USART3)) {
+            // Overrun occurred
+            USART3_OERHandler();
+        } else {
+            // Ignore other errors
+        }
+
+        // Clear all flags
+        USART3->ICR = 0xff;
+    } else {
+        USART3_RXHandler();
+    }
   /* USER CODE END USART3_IRQn 0 */
-  HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
 
   /* USER CODE END USART3_IRQn 1 */
