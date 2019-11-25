@@ -44,6 +44,7 @@
 .mxproject
 /Debug/
 core
+.gdb_history
 
 # Generated files
 Inc/version.h
