@@ -213,11 +213,11 @@ int main(void)
     xErrorQueueHandle = xQueueCreate(1, ERROR_MESSAGE_SIZE);
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
-    xTaskCreate(dmxTask, "dmx", 500, NULL, 4, &dmxTaskHandle);
-    xTaskCreate(pwmTask, "PWM", 1000, NULL, 2, &pwmTaskHandle);
-    xTaskCreate(displayTask, "display", 10000, NULL, 1, NULL);
-    xTaskCreate(addressableTask, "address", 1000, NULL, 1, NULL);
-    xTaskCreate(serialReadTask, "serialR", 1000, NULL, 4, NULL);
+    xTaskCreate(dmxTask, "dmx", 500, NULL, 5, &dmxTaskHandle);
+    xTaskCreate(pwmTask, "PWM", 1000, NULL, 4, &pwmTaskHandle);
+    xTaskCreate(displayTask, "display", 10000, NULL, 3, NULL);
+    xTaskCreate(addressableTask, "address", 1000, NULL, 4, NULL);
+    xTaskCreate(serialReadTask, "serialR", 1000, NULL, 2, NULL);
 
     // Re-enable the system clock
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
@@ -873,7 +873,7 @@ static void MX_USART3_UART_Init(void)
 
   /* USER CODE END USART3_Init 1 */
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 2000000;
+  huart3.Init.BaudRate = 500000;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;
