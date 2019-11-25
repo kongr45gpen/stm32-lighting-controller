@@ -137,6 +137,7 @@ void displayTask(void *pvParameters) {
             // Error message
             int line = 0;
             for (int i = 0; i < strlen(error); i += (SSD1306_WIDTH - 3) / 7) {
+                // Split the error message into multiple lines if it doesn't fit in one
                 ssd1306_SetCursor(3, 20 + (line++) * 12);
                 ssd1306_WriteString(error + i, Font_7x10, White);
             }
@@ -247,4 +248,6 @@ void displayTask(void *pvParameters) {
     }
 }
 
-
+BaseType_t addErrorMessage(const char *message, TickType_t xTicksToWait) {
+    return xQueueSend(xErrorQueueHandle, message, xTicksToWait);
+}

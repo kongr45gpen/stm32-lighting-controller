@@ -1,6 +1,7 @@
 #include <main.h>
 #include <stdbool.h>
 #include <universe.h>
+#include <displayTask.h>
 #include "serialTask.h"
 #include "stm32h7xx_ll_usart.h"
 #include "stdio.h"
@@ -26,7 +27,11 @@ void USART3_RXHandler(UART_HandleTypeDef *huart) {
     // we need to do this in the ISR (as such, a software FIFO is required), because not reading from the USART FIFO
     // doesn't clear the interrupt, and would end in an infinite loop
     uint8_t datum = USART3->RDR;
-    xStreamBufferSendFromISR(xSerialReceiveBufferHandle, &datum, 1, &xHigherPriorityTaskWoken);
+    if (1 != xStreamBufferSendFromISR(xSerialReceiveBufferHandle, &datum, 1, &xHigherPriorityTaskWoken)) {
+        // We didn't send the expected number of bytes
+        static const char message[256] = "Serial message buffer is full";
+        xQueueSendFromISR(xErrorQueueHandle, message, &xHigherPriorityTaskWoken);
+    }
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
@@ -46,10 +51,6 @@ bool UniverseCommand(uint8_t datum) {
     if (universeIsWritable) {
         universe[currentUniverseChannel] = datum;
     }
-
-    static uint8_t string [256];
-    size_t len = snprintf(string, 256, "Writing %d to channel %d\r\n", datum, currentUniverseChannel);
-    HAL_UART_Transmit(&huart3,string,len,1000);
 
     if (currentUniverseChannel < DMX_MAX - 1) {
         // The next byte we receive will be for the next channel
@@ -100,6 +101,9 @@ void serialReadTask(void *pvParameters) {
                         // Received DMX command, just move the state and let the rest of the data be parsed
                         currentCommand = eUniverseCommand;
                         currentUniverseChannel = 0; // Reset the channel count
+
+                        // Set the displayed mode on the screen
+                        displayModeSet(eModeSerial);
                         break;
                     case SERIAL_COM_RESET_ERRORS:
                         // Reset all errors
@@ -109,7 +113,7 @@ void serialReadTask(void *pvParameters) {
                         currentCommand = eUnknownCommand;
 
                         char message[ERROR_MESSAGE_SIZE] = "Unknown command received";
-                        xQueueSend(xErrorQueueHandle, message, 0);
+                        addErrorMessage(message, 0);
                 }
 
                 justReceivedOp = false; // Reset the old value

@@ -11,7 +11,7 @@
 
 // Some variables for led strip details that are modifiable by end users
 static uint16_t ledCount = 30 * 5;
-static uint16_t blockSize = 30 * 2;
+static uint16_t blockSize = 2;
 static uint8_t ledColours = 4;
 static const uint8_t bitDepth = 8;
 
