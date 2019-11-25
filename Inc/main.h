@@ -59,11 +59,12 @@ extern EventGroupHandle_t xPwmEventGroupHandle;
 extern EventGroupHandle_t xButtonEventGroupHandle;
 extern EventGroupHandle_t xSerialEventGroupHandle;
 extern StreamBufferHandle_t xSerialReceiveBufferHandle;
+extern QueueHandle_t xErrorQueueHandle;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define ERROR_MESSAGE_SIZE 256
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

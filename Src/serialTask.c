@@ -107,6 +107,9 @@ void serialReadTask(void *pvParameters) {
                     default:
                         // Unknown command received
                         currentCommand = eUnknownCommand;
+
+                        char message[ERROR_MESSAGE_SIZE] = "Unknown command received";
+                        xQueueSend(xErrorQueueHandle, message, 0);
                 }
 
                 justReceivedOp = false; // Reset the old value

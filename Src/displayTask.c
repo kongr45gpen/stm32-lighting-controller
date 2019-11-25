@@ -21,8 +21,7 @@ enum ModeDisplay modeDisplay = eModeReady;
 char *functionNames[] = {
         "Check",
         "Reset",
-        "B/O",
-        "Flash"
+        "B/O"
 };
 const uint8_t functionCount = sizeof(functionNames) / sizeof(functionNames[0]);
 
@@ -64,9 +63,7 @@ static void redraw() {
  * @param function
  */
 static void runFunction(uint8_t function) {
-    if (function == 3) { // Flash
-        modeDisplay = eModeFlash;
-    } else if (function == 1) { // Reset
+    if (function == 1) { // Reset
         modeDisplay = eModeReady;
         CommandReset();
     } else if (function == 2) { // Blackout
@@ -118,6 +115,42 @@ void displayTask(void *pvParameters) {
             vTaskDelay(10);
             // Reset the event bits
             xEventGroupClearBits(xButtonEventGroupHandle, 0xff);
+        } else if (0 != (DISPLAYTASK_RELEASED_BIT & xEventGroupWaitBits(xButtonEventGroupHandle, DISPLAYTASK_RELEASED_BIT, 0x0, pdFALSE, 0))) {
+            // A released event occured without a corresponding push event. Just clean it up, it's probably a leftover.
+            xEventGroupClearBits(xButtonEventGroupHandle, DISPLAYTASK_RELEASED_BIT);
+        }
+
+        // Receive and display error messages
+        static char error[ERROR_MESSAGE_SIZE];
+        if (pdTRUE == xQueueReceive(xErrorQueueHandle, error, 0)) {
+            // An error message has been received, just display it.
+            ssd1306_Fill(Black);
+
+            // Title
+            ssd1306_SetCursor(1, 0);
+            ssd1306_WriteString("ERROR", Font_11x18, White);
+
+            // Fancy exclamation mark
+            ssd1306_SetCursor(SSD1306_WIDTH - 17, SSD1306_HEIGHT - 27);
+            ssd1306_WriteString("!", Font_16x26, White);
+
+            // Error message
+            int line = 0;
+            for (int i = 0; i < strlen(error); i += (SSD1306_WIDTH - 3) / 7) {
+                ssd1306_SetCursor(3, 20 + (line++) * 12);
+                ssd1306_WriteString(error + i, Font_7x10, White);
+            }
+
+            ssd1306_UpdateScreen();
+
+            // Wait until the button is pressed
+            xEventGroupWaitBits(xButtonEventGroupHandle, DISPLAYTASK_PRESSED_BIT, 0x0, pdTRUE, 10000);
+            vTaskDelay(10); // Debouncing
+            // Reset the event bits
+            xEventGroupClearBits(xButtonEventGroupHandle, 0xff);
+
+            // Go back to the previous screen
+            redraw();
         }
 
         // Status string

@@ -75,6 +75,7 @@ EventGroupHandle_t xPwmEventGroupHandle;
 EventGroupHandle_t xButtonEventGroupHandle;
 EventGroupHandle_t xSerialEventGroupHandle;
 StreamBufferHandle_t xSerialReceiveBufferHandle;
+QueueHandle_t xErrorQueueHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -181,6 +182,7 @@ int main(void)
     xButtonEventGroupHandle = xEventGroupCreate();
     xSerialEventGroupHandle = xEventGroupCreate();
     xSerialReceiveBufferHandle = xStreamBufferCreate(16, 1);
+    xErrorQueueHandle = xQueueCreate(1, ERROR_MESSAGE_SIZE);
 
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
     xTaskCreate(dmxTask, "dmx", 500, NULL, 4, &dmxTaskHandle);
