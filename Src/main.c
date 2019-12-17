@@ -36,6 +36,7 @@
 #include "stm32h7xx_ll_usart.h"
 #include <stdio.h>
 #include <string.h>
+#include <wirelessTask.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,6 +79,7 @@ MDMA_HandleTypeDef hmdma_mdma_channel40_dma1_stream1_tc_0;
  * Note on the usage of peripherals:
  * RNG: Random number generator for use in debugging
  * SPI1: OLED display
+ * SPI3: nRF24L01+ wireless transceiver
  * UART2: DMX output (RS485)
  * UART3: Serial I/O (via ST-Link USB)
  * TIM1: PWM output and DMX transaction complete interrupt
@@ -227,6 +229,7 @@ int main(void)
     xTaskCreate(displayTask, "display", 10000, NULL, 3, NULL);
     xTaskCreate(addressableTask, "address", 1000, NULL, 4, NULL);
     xTaskCreate(serialReadTask, "serialR", 1000, NULL, 2, NULL);
+    xTaskCreate(wirelessTask, "wireles", 1000, NULL, 2, NULL);
 
     // Re-enable the system clock
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
@@ -1079,12 +1082,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(OLED_2_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : OLED_1_Pin NRF24_CSN_Pin NRF24_CE_Pin */
-  GPIO_InitStruct.Pin = OLED_1_Pin|NRF24_CSN_Pin|NRF24_CE_Pin;
+  /*Configure GPIO pin : OLED_1_Pin */
+  GPIO_InitStruct.Pin = OLED_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  HAL_GPIO_Init(OLED_1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PG2 */
   GPIO_InitStruct.Pin = GPIO_PIN_2;
@@ -1092,6 +1095,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : NRF24_CSN_Pin NRF24_CE_Pin */
+  GPIO_InitStruct.Pin = NRF24_CSN_Pin|NRF24_CE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 12, 0);

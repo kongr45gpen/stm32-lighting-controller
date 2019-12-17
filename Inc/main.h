@@ -50,6 +50,7 @@ extern TIM_HandleTypeDef htim16;
 extern TIM_HandleTypeDef htim17;
 extern RNG_HandleTypeDef hrng;
 extern UART_HandleTypeDef huart3;
+extern SPI_HandleTypeDef hspi3;
 
 // FreeRTOS task handles
 extern xTaskHandle pwmTaskHandle;
