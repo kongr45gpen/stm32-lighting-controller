@@ -9,9 +9,7 @@
 
 
 // Peripheral libraries
-#include <stm32f1xx.h>
-#include <stm32f1xx_hal_gpio.h>
-#include "SPI.h"
+#include "stm32h7xx.h"
 //#include <stm32f10x_spi.h>
 
 

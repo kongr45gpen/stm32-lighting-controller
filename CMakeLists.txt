@@ -47,7 +47,7 @@ file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Src/*.*" "Drivers_LL/*.*"
 file(GLOB FREERTOS_SOURCES "Lib/freertos/*.c" "Lib/freertos/portable/GCC/ARM_CM7/r0p1/port.c" "Lib/freertos/portable/MemMang/heap_2.c")
 
 # Other libraries
-file (GLOB LIBRARY_SOURCES "Lib/stm32-ssd1306/ssd1306/*.c")
+file (GLOB LIBRARY_SOURCES "Lib/stm32-ssd1306/ssd1306/*.c" "Lib/nrf24l01/*.c")
 
 include_directories(Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/STM32H7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include Drivers_LL/Inc)
 
@@ -69,4 +69,5 @@ include_directories(
         "${PROJECT_SOURCE_DIR}/Lib/freertos/include"
         "${PROJECT_SOURCE_DIR}/Lib/freertos/portable/GCC/ARM_CM7/r0p1"
         "${PROJECT_SOURCE_DIR}/Lib/stm32-ssd1306/ssd1306"
+        "${PROJECT_SOURCE_DIR}/Lib/nrf24l01"
 )
