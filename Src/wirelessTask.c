@@ -15,6 +15,8 @@ void wirelessTask(void *pvParameters) {
     nRF24_GPIO_Init();
     nRF24_Init();
 
+//    while(1) { nRF24_Check(); }
+
     if (!nRF24_Check()) {
         addErrorMessage("NRF24L01 not found", 100);
 

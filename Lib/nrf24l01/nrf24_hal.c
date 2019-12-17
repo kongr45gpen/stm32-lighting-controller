@@ -27,7 +27,9 @@ void nRF24_GPIO_Init(void)
 
 uint8_t nRF24_LL_RW(uint8_t data)
 {
-    static uint8_t receiveBuffer;
+    static uint8_t receiveBuffer = 7;
 
-    HAL_SPI_TransmitReceive(&hspi3, &data, &receiveBuffer, 1, 0);
+    uint8_t output = HAL_SPI_TransmitReceive(&hspi3, &data, &receiveBuffer, 1, 100);
+
+    return receiveBuffer;
 }
