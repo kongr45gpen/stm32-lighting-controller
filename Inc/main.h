@@ -105,12 +105,12 @@ void Error_Handler(void);
 #define USB_RX_GPIO_Port GPIOD
 #define OLED_1_Pin GPIO_PIN_15
 #define OLED_1_GPIO_Port GPIOD
+#define NRF24_CE_Pin GPIO_PIN_3
+#define NRF24_CE_GPIO_Port GPIOG
 #define NRF24_CSN_Pin GPIO_PIN_2
 #define NRF24_CSN_GPIO_Port GPIOD
 #define DMX_OUT_Pin GPIO_PIN_5
 #define DMX_OUT_GPIO_Port GPIOD
-#define NRF24_CE_Pin GPIO_PIN_7
-#define NRF24_CE_GPIO_Port GPIOD
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
