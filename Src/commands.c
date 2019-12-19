@@ -20,26 +20,31 @@ void testTask(void * pvParameters) {
     // First, black out all channels
     temporaryBlackout();
 
-    int i;
-    for (i = 0; i < 100; i++) {
-        // Reset previous values
-        if (i >= 2) universe[i - 2] = 0;
-        if (i >= 1) universe[i - 1] = 0;
+    static const int wings = 11;
+    int i, j;
+    for (i = 0; i < DMX_MAX / wings; i++) { // For each wing
 
-        // Make current values full
-        universe[i] = 255;
-        if (i + 1 < DMX_MAX) {
-            universe[i + 1] = 255;
-        }
+       for (j = 0; j < wings; j++) { // For each light in the wing
+           // Calculate the index of the current light
+           int index = j * DMX_MAX / wings + i;
+
+           if (index - 1 >= 0) {
+               // Black out the previous light, if it exists
+               universe[index - 1] = 0;
+           }
+
+           if (index < DMX_MAX) {
+               // Highlight the current light, if it exists
+               universe[index] = 255;
+           }
+       }
 
         notifyUniverseUpdate();
 
-        vTaskDelay(pdMS_TO_TICKS(1000 / 30)); // Try to get close to the DMX refresh rate (we have 30 fps)
+        vTaskDelay(pdMS_TO_TICKS(1000 / 10)); // Refresh 10 times per second
     }
 
-    // Reset the two final values
-    if (i - 1 < DMX_MAX) universe[i - 1] = 0;
-    if (i < DMX_MAX) universe[i] = 0;
+    temporaryBlackout();
 
     // Cleanup
     testRunning = false;
