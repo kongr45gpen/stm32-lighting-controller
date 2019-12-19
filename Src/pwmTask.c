@@ -90,6 +90,6 @@ void pwmTask( void *pvParameters ) {
 //        LL_TIM_OC_SetMode(TIM17, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_FORCED_INACTIVE);
 
         // Wait until the next timer interrupt
-        xEventGroupWaitBits(xPwmEventGroupHandle, PWMTASK_TIM_BIT | PWMTASK_UPDATE_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
+        xEventGroupWaitBits(xPwmEventGroupHandle, PWMTASK_TIM_BIT | PWMTASK_UPDATE_BIT, pdTRUE, pdTRUE, 1000/60);
     }
 }

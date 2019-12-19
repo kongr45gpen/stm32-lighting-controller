@@ -226,7 +226,7 @@ int main(void)
     xTaskCreate(pingTask, "ping", 500, NULL, 0, NULL);
     xTaskCreate(dmxTask, "dmx", 500, NULL, 5, &dmxTaskHandle);
     xTaskCreate(pwmTask, "PWM", 1000, NULL, 4, &pwmTaskHandle);
-    xTaskCreate(displayTask, "display", 10000, NULL, 3, NULL);
+    xTaskCreate(displayTask, "display", 5000, NULL, 3, NULL);
     xTaskCreate(addressableTask, "address", 1000, NULL, 4, NULL);
     xTaskCreate(serialReadTask, "serialR", 1000, NULL, 2, NULL);
     xTaskCreate(wirelessTask, "wireles", 1000, NULL, 2, NULL);

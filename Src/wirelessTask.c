@@ -17,7 +17,7 @@ void wirelessTask(void *pvParameters) {
 
 //    while(1) { nRF24_Check(); }
 
-    if (!nRF24_Check()) {
+    if (!nRF24_Check() || 1) {
         addErrorMessage("NRF24L01 not found", 100);
 
         // NRF24 not found, bail out
