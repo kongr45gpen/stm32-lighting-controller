@@ -2,6 +2,7 @@
 #include <string.h>
 #include <nrf24.h>
 #include <displayTask.h>
+#include <stdbool.h>
 #include "wirelessTask.h"
 
 static const uint8_t nrf24Address[] = "kL";
@@ -17,8 +18,9 @@ void wirelessTask(void *pvParameters) {
 
 //    while(1) { nRF24_Check(); }
 
-    if (!nRF24_Check() || 1) {
-        addErrorMessage("NRF24L01 not found", 100);
+    if (!nRF24_Check()) {
+        // Update the display showing the wireless sign
+        wirelessModeSet(false);
 
         // NRF24 not found, bail out
         vTaskDelete(NULL);
@@ -26,7 +28,8 @@ void wirelessTask(void *pvParameters) {
         // Just for safety
         return;
     } else {
-        addErrorMessage("NRF24L01 YES found", 100);
+        // Update the display showing the wireless sign
+        wirelessModeSet(true);
     }
 
     nRF24_SetRFChannel(99); // Set RF channel
@@ -37,15 +40,19 @@ void wirelessTask(void *pvParameters) {
     nRF24_SetAddr(nRF24_PIPE0, nrf24Address); // Program TX address for pipe#0 (auto-ack)
     nRF24_SetTXPower(nRF24_TXPWR_0dBm); // Set RF power (maximum)
     nRF24_DisableAA(nRF24_PIPE0); // Disable Auto-ACK
+    nRF24_DisableAA(nRF24_PIPETX); // Disable Auto-ACK
+    nRF24_SetAutoRetr(nRF24_ARD_NONE,0); // Never re-transmit packets
     nRF24_SetOperationalMode(nRF24_MODE_TX); // Set transmit mode
     nRF24_SetPowerMode(nRF24_PWR_UP); // Wake up the transceiver
 
     while (1) {
+        wirelessUpdate();
+
         uint8_t payload[] = "Hello world to the wondrous world of music! What more could one ask?";
 
         nRF24_ClearIRQFlags(); // Clear any pending IRQ flags
         nRF24_TransmitPacket(payload, strlen(payload));
 
-        vTaskDelay(400);
+        vTaskDelay(1000/30);
     }
 }

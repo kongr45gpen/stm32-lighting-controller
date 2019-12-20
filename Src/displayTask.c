@@ -17,6 +17,8 @@
 #define CHAN_HEIGHT 6
 
 enum ModeDisplay modeDisplay = eModeReady;
+uint8_t wirelessState = 0;
+uint8_t wirelessBlink = 0;
 
 char *functionNames[] = {
         "Check",
@@ -73,6 +75,54 @@ static void runFunction(uint8_t function) {
         modeDisplay = eModeCheck;
         CommandTest();
     }
+}
+
+/**
+ * Draw an antenna with the top left corner at the specified x,y coordinates
+ * The antenna's dimensions are 14x15
+ */
+static void drawAntenna(uint16_t x, uint16_t y, SSD1306_COLOR c) {
+    // Wave #1
+    ssd1306_DrawPixel(x+6, y, c);
+    ssd1306_DrawPixel(x+7, y, c);
+    ssd1306_DrawPixel(x+8, y, c);
+    ssd1306_DrawPixel(x+9, y+1, c);
+    ssd1306_DrawPixel(x+10, y+2, c);
+    ssd1306_DrawPixel(x+11, y+3, c);
+    ssd1306_DrawPixel(x+12, y+4, c);
+    ssd1306_DrawPixel(x+13, y+5, c);
+    ssd1306_DrawPixel(x+13, y+6, c);
+    ssd1306_DrawPixel(x+13, y+7, c);
+
+    // Wave #2
+    ssd1306_DrawPixel(x+6, y+3, c);
+    ssd1306_DrawPixel(x+7, y+3, c);
+    ssd1306_DrawPixel(x+8, y+4, c);
+    ssd1306_DrawPixel(x+9, y+5, c);
+    ssd1306_DrawPixel(x+10, y+6, c);
+    ssd1306_DrawPixel(x+10, y+7, c);
+
+    // Base (diagonal part)
+    for (int i = 1; i <= 10; i++) {
+        for (int j = i; j <= i+5 && j <= 11; j++) {
+            ssd1306_DrawPixel(x+i, y+j, c);
+        }
+    }
+
+    ssd1306_DrawPixel(x+2, y+9, c);
+    ssd1306_DrawPixel(x+3, y+10, c);
+
+    // Base (block part)
+    for (int i = 1; i <= 5; i++) {
+        for (int j = 11; j <= 14; j++) {
+            ssd1306_DrawPixel(x+i, y+j, c);
+        }
+    }
+
+    ssd1306_DrawPixel(x, y+13, c);
+    ssd1306_DrawPixel(x, y+14, c);
+    ssd1306_DrawPixel(x+6, y+14, c);
+    ssd1306_DrawPixel(x+7, y+14, c);
 }
 
 void displayTask(void *pvParameters) {
@@ -178,8 +228,29 @@ void displayTask(void *pvParameters) {
             default:
                 memcpy(modeText, "???", 3);
         }
-        ssd1306_SetCursor(92, 0); // top right corner
+
+        if (wirelessState) {
+            modeText[2] = ' '; // Set the mode to 2 characters only, to make space for the antenna
+        }
+
+        ssd1306_SetCursor(91, 0); // top right corner
         ssd1306_WriteString(modeText, Font_11x18, White);
+
+        // Draw the antenna if wireless transmission is enabled
+        if (wirelessState) {
+            // Now we can draw the antenna
+            // Draw the antenna as white if the wireless blink is in the state "ready to be blinked"
+            drawAntenna(91 + 2 * 11, 0, (wirelessBlink == 1) ? White : Black);
+
+            // Update the wireless blinking state machine
+            if (wirelessBlink == 0) { // If the state is "completed a blinking cycle"
+                wirelessBlink = 2; // set the state to "expecting blink notification"
+                // Then, the caller will be able to issue blinks again.
+            } else if (wirelessBlink == 1) { // If the state is "ready to be blinked"
+                wirelessBlink = 0; // set the state to "completed blinking cycle"
+                // We are in the middle of a blinking cycle. The caller will not be allowed to alter it.
+            }
+        }
 
         // Show a refresh rate indicator to let the user know if the screen is being updated
         ssd1306_SetCursor(85, 0); // Draw next to the title

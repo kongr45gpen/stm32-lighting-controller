@@ -15,6 +15,8 @@ enum ModeDisplay {
 };
 
 extern enum ModeDisplay modeDisplay;
+extern uint8_t wirelessState;
+extern uint8_t wirelessBlink;
 
 void displayTask(void * pvParameters);
 
@@ -31,6 +33,25 @@ static inline void displayModeReset() {
  */
 static inline void displayModeSet(enum ModeDisplay newDisplayMode) {
     modeDisplay = newDisplayMode;
+}
+
+/**
+ * Set the wireless state (whether wireless transmission is enabled)
+ * @param newWirelessState 0 or 1
+ */
+static inline void wirelessModeSet(uint8_t newWirelessState) {
+    wirelessState = newWirelessState;
+}
+
+/**
+ * Blink an indicator for wireless data
+ */
+static inline void wirelessUpdate() {
+    // Wireless blinking state machine
+    if (wirelessBlink == 2) { // Only update the blink if our current state is 2, i.e. if the antenna has been blinked
+        // Set to ready-to-blink state
+        wirelessBlink = 1;
+    }
 }
 
 /**
