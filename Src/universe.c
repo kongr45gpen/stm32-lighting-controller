@@ -6,7 +6,7 @@
 #include "universe.h"
 #include "pwmTask.h"
 
-uint8_t universe[DMX_MAX];
+volatile uint8_t universe[DMX_MAX];
 
 bool universeIsWritable = true;
 

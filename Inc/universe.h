@@ -15,7 +15,7 @@ extern bool universeIsWritable;
 /**
  * DMX values for all DMX channels, 1-512
  */
-extern uint8_t universe[DMX_MAX];
+extern volatile uint8_t universe[DMX_MAX];
 
 /**
  * Get a DMX value
