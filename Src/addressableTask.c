@@ -14,6 +14,7 @@ static uint16_t ledCount = 8;
 static uint16_t blockSize = 1;
 static uint8_t ledColours = 3;
 static const uint8_t bitDepth = 8;
+static uint16_t startingAddress = 50;
 
 #define ADDRESSABLE_LEDS_MAX 5500 // The maximum number of values in the array. Keep flexible for manual assignment.
 #define EMPTY_SIZE 80 // Number of low pulses to be sent
@@ -40,13 +41,14 @@ void parseUniverse() {
         }
 
         uint8_t datum; // The data as declared in the universe
+        // TODO: Add check for universe overflow
         if (blockSize <= 1) {
             // If we have individual access to the LEDS, just use the universe value
-            datum = universe[i];
+            datum = universe[startingAddress + i];
         } else {
             uint16_t colour = i % ledColours;
             uint16_t block = i / ledColours / blockSize;
-            datum = universe[colour + block * ledColours];
+            datum = universe[startingAddress + colour + block * ledColours];
         }
 
         for (uint8_t bit = 0; bit < bitDepth; bit++) {
