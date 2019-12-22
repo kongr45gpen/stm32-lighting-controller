@@ -10,9 +10,9 @@
 #include "stm32h7xx_ll_tim.h"
 
 // Some variables for led strip details that are modifiable by end users
-static uint16_t ledCount = 30 * 5;
-static uint16_t blockSize = 2;
-static uint8_t ledColours = 4;
+static uint16_t ledCount = 8;
+static uint16_t blockSize = 1;
+static uint8_t ledColours = 3;
 static const uint8_t bitDepth = 8;
 
 #define ADDRESSABLE_LEDS_MAX 5500 // The maximum number of values in the array. Keep flexible for manual assignment.
